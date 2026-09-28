@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JEE Study Tracker App – Chapters, Mock Tests &amp; Study Hours</title>
+<meta name="description" content="Open the free JEE Study Tracker: log study sessions, tick off Physics, Chemistry and Maths chapter checklists, record mock tests and PYQ accuracy, and hit weekly targets. Data stays in your browser.">
+<link rel="canonical" href="https://YOURDOMAIN.com/app.html">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#ff8a3d">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="JEE Study Tracker">
+<meta property="og:title" content="JEE Study Tracker App – Chapters, Mock Tests &amp; Study Hours">
+<meta property="og:description" content="Free tracker for JEE Main &amp; Advanced aspirants: chapter checklists, mock test analysis, PYQ accuracy, streaks and weekly targets.">
+<meta property="og:url" content="https://YOURDOMAIN.com/app.html">
+<meta property="og:image" content="https://YOURDOMAIN.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="JEE Study Tracker App">
+<meta name="twitter:description" content="Track JEE chapters, study hours, mock tests and weak topics – free, offline, private.">
+<meta name="twitter:image" content="https://YOURDOMAIN.com/og-image.png">
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script src="./support.js" defer></script>
+<script>
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+  }
+</script>
+</head>
+<body>
+<noscript>
+  <h1>JEE Study Tracker</h1>
+  <p>This free JEE Main &amp; Advanced study tracker needs JavaScript. Please enable it to track chapters, study hours, question practice and mock tests. <a href="index.html">Learn more about the tracker</a>.</p>
+</noscript>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#f7f2ea;font-family:'Inter',sans-serif;}
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:#e0d3b3;border-radius:4px;}
+  a{color:#c2570a;}
+  a:hover{color:#e0720f;}
+  @keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+  @keyframes toastin{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</helmet>
+
+<div style="display:flex;min-height:100vh;background:#f7f2ea;color:#2b2620;">
+
+  <!-- SIDEBAR -->
+  <nav aria-label="Main navigation" style="box-sizing:border-box;width:240px;flex:0 0 240px;background:#faf6ee;border-right:1px solid #e6dcc4;display:{{ sidebarDisplay }};flex-direction:column;padding:20px 14px;position:fixed;top:0;bottom:0;left:0;z-index:40;overflow-y:auto;">
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 8px 22px 8px;">
+      <div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#ff8a3d,#ff5e1a);flex:0 0 auto;"></div>
+      <div style="font-weight:800;font-size:15px;letter-spacing:0.3px;">JEE TRACKER</div>
+      <button type="button" aria-label="Close menu" onclick="{{ closeSidebar }}" style="background:none;border:none;font:inherit;margin-left:auto;display:{{ closeBtnDisplay }};cursor:pointer;color:#8c8064;font-size:18px;">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px;">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="12">
+        <a href="{{ item.href }}" onclick="{{ item.go }}" aria-current="{{ item.current }}" style="display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:8px;cursor:pointer;text-decoration:none;background:{{ item.bg }};color:{{ item.color }};">
+          <div aria-hidden="true" style="width:26px;height:26px;border-radius:7px;background:{{ item.badgeBg }};color:{{ item.badgeColor }};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:0 0 auto;">{{ item.abbr }}</div>
+          <div style="font-size:13.5px;font-weight:500;">{{ item.label }}</div>
+        </a>
+      </sc-for>
+    </div>
+    <div style="margin-top:auto;padding-top:16px;border-top:1px solid #e6dcc4;display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f1e8d6;border-radius:9px;">
+        <div style="font-size:15px;">🔥</div>
+        <div>
+          <div style="font-size:12px;color:#7d7260;">Streak</div>
+          <div style="font-size:13px;font-weight:700;">{{ streakDays }} days</div>
+        </div>
+        <div style="margin-left:auto;text-align:right;">
+          <div style="font-size:12px;color:#7d7260;">Today</div>
+          <div style="font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace;">{{ todayTimeLabel }}</div>
+        </div>
+      </div>
+      <a href="#/settings" onclick="{{ goSettings }}" style="display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;color:#6b6152;text-decoration:none;">
+        <div aria-hidden="true" style="width:26px;height:26px;border-radius:7px;background:#efe4cd;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">SE</div>
+        <div style="font-size:13.5px;">Settings</div>
+      </a>
+    </div>
+  </nav>
+
+  <!-- MOBILE OVERLAY -->
+  <sc-if value="{{ sidebarOpen }}" hint-placeholder-val="{{ false }}">
+    <div onclick="{{ closeSidebar }}" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:30;display:{{ overlayDisplay }};"></div>
+  </sc-if>
+
+  <!-- MAIN -->
+  <div style="flex:1;margin-left:{{ mainMargin }};min-width:0;">
+    <!-- TOP BAR -->
+    <header style="position:sticky;top:0;z-index:20;background:rgba(247,242,234,0.85);backdrop-filter:blur(10px);border-bottom:1px solid #e6dcc4;display:flex;align-items:center;gap:12px;padding:14px 24px;">
+      <button type="button" aria-label="Open menu" onclick="{{ openSidebar }}" style="background:none;border:none;font:inherit;padding:0;display:{{ hamburgerDisplay }};cursor:pointer;font-size:18px;color:#4a4238;">☰</button>
+      <h1 style="margin:0;font-size:15px;font-weight:700;">{{ pageTitle }}</h1>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px;">
+        <button type="button" aria-label="Search (Ctrl or Cmd + K)" onclick="{{ openSearch }}" style="font:inherit;display:flex;align-items:center;gap:8px;background:#fffdf8;border:1px solid #ddd0b3;border-radius:8px;padding:7px 12px;cursor:pointer;color:#7d7260;font-size:13px;">
+          <span>Search</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px;background:#e6dcc4;padding:2px 6px;border-radius:4px;">⌘K</span>
+        </button>
+        <div role="button" tabindex="0" aria-label="Quick add" onclick="{{ toggleQuick }}" style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#ff8a3d,#ff5e1a);color:#100c08;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;">
+          +
+          <sc-if value="{{ quickOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;top:42px;right:0;background:#fffdf8;border:1px solid #ddd0b3;border-radius:10px;padding:6px;width:190px;box-shadow:0 12px 32px rgba(0,0,0,0.5);text-align:left;">
+              <sc-for list="{{ quickActions }}" as="qa" hint-placeholder-count="6">
+                <div onclick="{{ qa.go }}" style="padding:8px 10px;border-radius:7px;cursor:pointer;font-size:13px;color:#3a332a;">{{ qa.label }}</div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </header>
+
+    <main style="padding:{{ mainPadding }};max-width:1320px;box-sizing:border-box;">
+
+      <!-- REMINDERS -->
+      <sc-if value="{{ hasReminders }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px;">
+          <sc-for list="{{ reminders }}" as="rem" hint-placeholder-count="2">
+            <div style="background:#fff3d9;border:1px solid #f0cf8e;color:#8a5a12;padding:10px 14px;border-radius:9px;font-size:13px;font-weight:500;">{{ rem }}</div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ================= DASHBOARD ================= -->
+      <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <div style="margin-bottom:20px;">
+            <div style="font-size:24px;font-weight:800;">Good {{ timeOfDay }}, {{ userName }} 👋</div>
+            <div style="color:#7d7260;font-size:14px;margin-top:4px;">Your JEE preparation at a glance · {{ todayDateLabel }}</div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:14px;margin-bottom:18px;">
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;">
+              <div style="color:#7d7260;font-size:12.5px;font-weight:600;margin-bottom:10px;">STUDY TIME TODAY</div>
+              <div style="font-size:26px;font-weight:800;font-family:'JetBrains Mono',monospace;">{{ todayTimeLabel }}</div>
+              <div style="color:#7d7260;font-size:12px;margin:6px 0 10px 0;">Target {{ targetTimeLabel }} · {{ studyPct }}%</div>
+              <div style="height:6px;background:#e6dcc4;border-radius:3px;overflow:hidden;"><div style="height:100%;width:{{ studyPctClamped }}%;background:linear-gradient(90deg,#ff8a3d,#ff5e1a);"></div></div>
+            </div>
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;">
+              <div style="color:#7d7260;font-size:12.5px;font-weight:600;margin-bottom:10px;">QUESTIONS SOLVED</div>
+              <div style="font-size:26px;font-weight:800;font-family:'JetBrains Mono',monospace;">{{ todayQuestions }}</div>
+              <div style="color:#7d7260;font-size:12px;margin:6px 0 10px 0;">Target {{ questionTarget }} · {{ questionPct }}%</div>
+              <div style="height:6px;background:#e6dcc4;border-radius:3px;overflow:hidden;"><div style="height:100%;width:{{ questionPctClamped }}%;background:linear-gradient(90deg,#ff8a3d,#ff5e1a);"></div></div>
+            </div>
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;">
+              <div style="color:#7d7260;font-size:12.5px;font-weight:600;margin-bottom:10px;">CURRENT STREAK</div>
+              <div style="font-size:26px;font-weight:800;">🔥 {{ streakDays }} Days</div>
+              <div style="color:#7d7260;font-size:12px;margin-top:6px;">XP: {{ xp }} · {{ milestoneCount }} milestones</div>
+            </div>
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;">
+              <div style="color:#7d7260;font-size:12.5px;font-weight:600;margin-bottom:10px;">OVERALL PROGRESS</div>
+              <div style="font-size:26px;font-weight:800;">{{ overallProgress }}%</div>
+              <div style="height:6px;background:#e6dcc4;border-radius:3px;overflow:hidden;margin-top:10px;"><div style="height:100%;width:{{ overallProgress }}%;background:linear-gradient(90deg,#ff8a3d,#ff5e1a);"></div></div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:{{ splitCols }};gap:14px;margin-bottom:18px;">
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;min-width:0;">
+              <div style="display:flex;align-items:center;margin-bottom:14px;">
+                <div style="font-size:15px;font-weight:700;">Today's Plan</div>
+                <div onclick="{{ openTaskModal }}" style="margin-left:auto;font-size:12.5px;color:#c2570a;cursor:pointer;font-weight:600;">+ Add task</div>
+              </div>
+              <sc-if value="{{ hasTasksToday }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <sc-for list="{{ todayTasks }}" as="t" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;gap:11px;padding:11px 12px;background:{{ t.rowBg }};border:1px solid #e6dcc4;border-radius:10px;">
+                      <div onclick="{{ t.toggle }}" style="width:19px;height:19px;border-radius:5px;border:1.5px solid {{ t.checkColor }};background:{{ t.checkBg }};flex:0 0 auto;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#f7f2ea;font-size:12px;">{{ t.checkMark }}</div>
+                      <div style="min-width:0;flex:1;">
+                        <div style="font-size:13.5px;font-weight:600;text-decoration:{{ t.strike }};color:{{ t.titleColor }};">{{ t.title }}</div>
+                        <div style="font-size:12px;color:#7d7260;margin-top:2px;">{{ t.subject }} · {{ t.chapter }}</div>
+                      </div>
+                      <div style="font-size:11px;font-weight:700;color:{{ t.prioColor }};background:{{ t.prioBg }};padding:3px 8px;border-radius:6px;flex:0 0 auto;">{{ t.priority }}</div>
+                      <div onclick="{{ t.remove }}" style="color:#8c8064;cursor:pointer;font-size:13px;padding:2px 4px;">✕</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{ noTasksToday }}" hint-placeholder-val="{{ false }}">
+                <div style="text-align:center;padding:26px 10px;color:#7d7260;">
+                  <div style="font-size:13.5px;margin-bottom:12px;">No tasks planned for today.</div>
+                  <div onclick="{{ openTaskModal }}" style="display:inline-block;background:#ff8a3d;color:#100c08;font-weight:700;font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer;">Add a task</div>
+                </div>
+              </sc-if>
+            </div>
+
+          </div>
+
+          <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;margin-bottom:18px;">
+            <div style="font-size:15px;font-weight:700;margin-bottom:16px;">Weekly Study Hours</div>
+            <div style="display:flex;align-items:flex-end;gap:14px;height:140px;padding:0 6px;">
+              <sc-for list="{{ weekBars }}" as="b" hint-placeholder-count="7">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end;">
+                  <div style="font-size:10.5px;color:#7d7260;font-family:'JetBrains Mono',monospace;">{{ b.label }}</div>
+                  <div style="width:100%;max-width:34px;height:{{ b.height }}px;border-radius:6px 6px 2px 2px;background:{{ b.color }};"></div>
+                  <div style="font-size:10.5px;color:#8c8064;">{{ b.day }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px;margin-bottom:18px;">
+            <sc-for list="{{ subjectCards }}" as="sc" hint-placeholder-count="3">
+              <div onclick="{{ sc.open }}" style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:16px;cursor:pointer;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                  <div style="width:9px;height:9px;border-radius:50%;background:{{ sc.color }};"></div>
+                  <div style="font-size:13.5px;font-weight:700;">{{ sc.name }}</div>
+                  <div style="margin-left:auto;font-size:15px;font-weight:800;">{{ sc.pct }}%</div>
+                </div>
+                <div style="height:6px;background:#e6dcc4;border-radius:3px;overflow:hidden;margin-bottom:10px;"><div style="height:100%;width:{{ sc.pct }}%;background:{{ sc.color }};"></div></div>
+                <div style="display:flex;justify-content:space-between;font-size:11.5px;color:#7d7260;">
+                  <span>{{ sc.completed }}/{{ sc.total }} chapters</span><span>{{ sc.accuracy }}% acc</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;margin-bottom:18px;">
+              <div style="font-size:15px;font-weight:700;margin-bottom:12px;">Topics That Need Attention</div>
+              <sc-if value="{{ hasWeakChapters }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <sc-for list="{{ weakChapterList }}" as="w" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;background:#f1e8d6;border-radius:9px;">
+                      <div style="font-size:13px;flex:1;min-width:0;">{{ w.label }}</div>
+                      <div style="font-size:12px;font-weight:700;color:#c23f3f;">{{ w.accuracy }}%</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{ noWeakChapters }}" hint-placeholder-val="{{ true }}">
+                <div style="color:#7d7260;font-size:13px;">No weak topics detected yet — keep logging practice.</div>
+              </sc-if>
+          </div>
+
+          <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;">
+            <div style="font-size:15px;font-weight:700;margin-bottom:12px;">Recent Activity</div>
+            <sc-if value="{{ hasActivity }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <sc-for list="{{ recentActivity }}" as="ra" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid #e6dcc4;font-size:12.5px;">
+                    <span style="color:#7d7260;width:70px;flex:0 0 auto;">{{ ra.date }}</span>
+                    <span style="flex:1;min-width:0;">{{ ra.text }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ noActivity }}" hint-placeholder-val="{{ true }}">
+              <div style="text-align:center;padding:18px;color:#7d7260;">
+                <div style="font-size:13px;margin-bottom:10px;">No study sessions yet. Start your first focus session to begin building your study history.</div>
+                <div onclick="{{ openSessionModal }}" style="display:inline-block;background:#ff8a3d;color:#100c08;font-weight:700;font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer;">Log a Session</div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ================= PLANNER ================= -->
+      <sc-if value="{{ isPlanner }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div style="display:flex;align-items:center;margin-bottom:4px;">
+            <div style="font-size:22px;font-weight:800;">Weekly Target</div>
+            <div onclick="{{ openTargetModal }}" style="margin-left:auto;background:#ff8a3d;color:#100c08;font-weight:700;font-size:12.5px;padding:8px 14px;border-radius:8px;cursor:pointer;">+ Add Target</div>
+          </div>
+          <div style="color:#7d7260;font-size:13.5px;margin-bottom:18px;">Set a deadline for a chapter, PYQ session, revision session or anything else.</div>
+
+          <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;margin-bottom:14px;">
+            <div style="font-size:14px;font-weight:700;color:#c23f3f;margin-bottom:12px;">Overdue</div>
+            <sc-if value="{{ hasOverdueTargets }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <sc-for list="{{ overdueTargets }}" as="tg" hint-placeholder-count="0">
+                  <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:#f1e8d6;border-radius:9px;">
+                    <div onclick="{{ tg.toggle }}" style="width:19px;height:19px;border-radius:5px;border:1.5px solid #b8ab8f;flex:0 0 auto;cursor:pointer;"></div>
+                    <div style="flex:1;min-width:0;">
+                      <div style="font-size:13px;font-weight:600;">{{ tg.title }}</div>
+                      <div style="font-size:11.5px;color:#7d7260;">{{ tg.type }} · {{ tg.subject }}</div>
+                    </div>
+                    <div style="font-size:11.5px;color:#c23f3f;font-weight:700;">{{ tg.deadline }}</div>
+                    <div onclick="{{ tg.remove }}" style="color:#8c8064;cursor:pointer;">✕</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ noOverdueTargets }}" hint-placeholder-val="{{ true }}">
+              <div style="color:#7d7260;font-size:13px;">Nothing overdue.</div>
+            </sc-if>
+          </div>
+
+          <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;margin-bottom:14px;">
+            <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Due This Week</div>
+            <sc-if value="{{ hasWeekTargets }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <sc-for list="{{ weekTargets }}" as="tg" hint-placeholder-count="0">
+                  <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:#f1e8d6;border-radius:9px;">
+                    <div onclick="{{ tg.toggle }}" style="width:19px;height:19px;border-radius:5px;border:1.5px solid #b8ab8f;flex:0 0 auto;cursor:pointer;"></div>
+                    <div style="flex:1;min-width:0;">
+                      <div style="font-size:13px;font-weight:600;">{{ tg.title }}</div>
+                      <div style="font-size:11.5px;color:#7d7260;">{{ tg.type }} · {{ tg.subject }}</div>
+                    </div>
+                    <div style="font-size:11.5px;color:#a3650a;font-weight:700;">{{ tg.deadline }}</div>
+                    <div onclick="{{ tg.remove }}" style="color:#8c8064;cursor:pointer;">✕</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ noWeekTargets }}" hint-placeholder-val="{{ true }}">
+              <div style="color:#7d7260;font-size:13px;">Nothing due this week.</div>
+            </sc-if>
+          </div>
+
+          <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;margin-bottom:14px;">
+            <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Later</div>
+            <sc-if value="{{ hasLaterTargets }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <sc-for list="{{ laterTargets }}" as="tg" hint-placeholder-count="0">
+                  <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:#f1e8d6;border-radius:9px;">
+                    <div onclick="{{ tg.toggle }}" style="width:19px;height:19px;border-radius:5px;border:1.5px solid #b8ab8f;flex:0 0 auto;cursor:pointer;"></div>
+                    <div style="flex:1;min-width:0;">
+                      <div style="font-size:13px;font-weight:600;">{{ tg.title }}</div>
+                      <div style="font-size:11.5px;color:#7d7260;">{{ tg.type }} · {{ tg.subject }}</div>
+                    </div>
+                    <div style="font-size:11.5px;color:#7d7260;font-weight:700;">{{ tg.deadline }}</div>
+                    <div onclick="{{ tg.remove }}" style="color:#8c8064;cursor:pointer;">✕</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ noLaterTargets }}" hint-placeholder-val="{{ true }}">
+              <div style="color:#7d7260;font-size:13px;">Nothing further out.</div>
+            </sc-if>
+          </div>
+
+          <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;">
+            <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Completed</div>
+            <sc-if value="{{ hasDoneTargets }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <sc-for list="{{ doneTargets }}" as="tg" hint-placeholder-count="0">
+                  <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:#faf6ee;border-radius:9px;">
+                    <div onclick="{{ tg.toggle }}" style="width:19px;height:19px;border-radius:5px;border:1.5px solid #ff8a3d;background:#ff8a3d;flex:0 0 auto;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#100c08;font-size:12px;">✓</div>
+                    <div style="flex:1;min-width:0;">
+                      <div style="font-size:13px;font-weight:600;text-decoration:line-through;color:#8c8064;">{{ tg.title }}</div>
+                      <div style="font-size:11.5px;color:#7d7260;">{{ tg.type }} · {{ tg.subject }}</div>
+                    </div>
+                    <div onclick="{{ tg.remove }}" style="color:#8c8064;cursor:pointer;">✕</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ noDoneTargets }}" hint-placeholder-val="{{ true }}">
+              <div style="color:#7d7260;font-size:13px;">No completed targets yet.</div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ================= SUBJECTS ================= -->
+      <sc-if value="{{ isSubjects }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div style="font-size:22px;font-weight:800;margin-bottom:4px;">Subjects</div>
+          <div style="color:#7d7260;font-size:13.5px;margin-bottom:18px;">Overview across Physics, Chemistry and Mathematics.</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:16px;">
+            <sc-for list="{{ subjectDetailCards }}" as="s" hint-placeholder-count="3">
+              <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:16px;padding:20px;">
+                <div style="display:flex;align-items:center;gap:9px;margin-bottom:16px;">
+                  <div style="width:11px;height:11px;border-radius:50%;background:{{ s.color }};"></div>
+                  <div style="font-size:16px;font-weight:800;">{{ s.name }}</div>
+                  <div style="margin-left:auto;font-size:20px;font-weight:800;">{{ s.pct }}%</div>
+                </div>
+                <div style="height:7px;background:#e6dcc4;border-radius:4px;overflow:hidden;margin-bottom:16px;"><div style="height:100%;width:{{ s.pct }}%;background:{{ s.color }};"></div></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <div><div style="font-size:11px;color:#7d7260;">Completed</div><div style="font-size:14px;font-weight:700;">{{ s.completed }}</div></div>
+                  <div><div style="font-size:11px;color:#7d7260;">In Progress</div><div style="font-size:14px;font-weight:700;">{{ s.inProgress }}</div></div>
+                  <div><div style="font-size:11px;color:#7d7260;">Not Started</div><div style="font-size:14px;font-weight:700;">{{ s.notStarted }}</div></div>
+                  <div><div style="font-size:11px;color:#7d7260;">Questions Solved</div><div style="font-size:14px;font-weight:700;">{{ s.questionsSolved }}</div></div>
+                  <div><div style="font-size:11px;color:#7d7260;">Accuracy</div><div style="font-size:14px;font-weight:700;">{{ s.accuracy }}%</div></div>
+                  <div><div style="font-size:11px;color:#7d7260;">Study Hours</div><div style="font-size:14px;font-weight:700;">{{ s.hours }}h</div></div>
+                </div>
+                <div onclick="{{ s.open }}" style="margin-top:16px;text-align:center;background:#efe4cd;padding:9px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;">View Chapters</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ================= CHAPTERS ================= -->
+      <sc-if value="{{ isChapters }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <sc-if value="{{ chapterListMode }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:22px;font-weight:800;margin-bottom:14px;">Chapters</div>
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+              <sc-for list="{{ chapterFilters }}" as="f" hint-placeholder-count="3">
+                <div onclick="{{ f.select }}" style="padding:7px 14px;border-radius:8px;cursor:pointer;font-size:12.5px;font-weight:600;background:{{ f.bg }};color:{{ f.color }};">{{ f.label }}</div>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <sc-for list="{{ filteredChapters }}" as="c" hint-placeholder-count="10">
+                <div onclick="{{ c.open }}" style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;flex-wrap:wrap;">
+                  <div style="flex:1;min-width:160px;">
+                    <div style="font-size:13.5px;font-weight:600;">{{ c.name }}</div>
+                    <div style="font-size:11px;color:#7d7260;margin-top:2px;">{{ c.category }}</div>
+                  </div>
+                  <div style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;background:{{ c.statusBg }};color:{{ c.statusColor }};flex:0 0 auto;">{{ c.statusLabel }}</div>
+                  <div style="width:100px;height:6px;background:#e6dcc4;border-radius:3px;overflow:hidden;flex:0 0 auto;"><div style="height:100%;width:{{ c.completion }}%;background:#ff8a3d;"></div></div>
+                  <div style="font-size:12px;color:#7d7260;width:32px;text-align:right;flex:0 0 auto;">{{ c.completion }}%</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ chapterWorkspaceOpen }}" hint-placeholder-val="{{ false }}">
+            <div onclick="{{ closeChapterWorkspace }}" style="cursor:pointer;color:#c2570a;font-size:12.5px;font-weight:600;margin-bottom:14px;">← Back to chapters</div>
+            <div style="font-size:11px;color:#7d7260;text-transform:uppercase;letter-spacing:0.5px;">{{ workspace.subject }}</div>
+            <div style="font-size:22px;font-weight:800;margin-bottom:10px;">{{ workspace.name }}</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+              <div style="font-size:13px;color:#7d7260;">Progress</div>
+              <div style="font-size:15px;font-weight:800;">{{ workspace.completion }}%</div>
+            </div>
+            <div style="height:8px;background:#e6dcc4;border-radius:4px;overflow:hidden;margin-bottom:16px;"><div style="height:100%;width:{{ workspace.completion }}%;background:#ff8a3d;"></div></div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px;margin-bottom:16px;">
+              <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:14px;"><div style="font-size:11px;color:#7d7260;">JEE Main Readiness</div><div style="font-size:20px;font-weight:800;">{{ workspace.mainReadiness }}%</div></div>
+              <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:14px;"><div style="font-size:11px;color:#7d7260;">JEE Advanced Readiness</div><div style="font-size:20px;font-weight:800;">{{ workspace.advReadiness }}%</div></div>
+            </div>
+            <sc-for list="{{ workspace.sections }}" as="sec" hint-placeholder-count="7">
+              <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:16px;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;margin-bottom:10px;">
+                  <div style="font-size:13px;font-weight:700;">{{ sec.title }}</div>
+                  <div style="margin-left:auto;font-size:11.5px;color:#7d7260;">{{ sec.doneCount }}/{{ sec.total }}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px;">
+                  <sc-for list="{{ sec.items }}" as="it" hint-placeholder-count="5">
+                    <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#3a332a;cursor:pointer;">
+                      <input type="checkbox" checked="{{ it.checked }}" onchange="{{ it.toggle }}" style="width:15px;height:15px;accent-color:#ff8a3d;cursor:pointer;"/>{{ it.label }}
+                    </label>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:16px;margin-bottom:12px;">
+              <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Custom Checklist</div>
+              <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:10px;">
+                <sc-for list="{{ workspace.customItems }}" as="ci" hint-placeholder-count="0">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#3a332a;cursor:pointer;flex:1;">
+                      <input type="checkbox" checked="{{ ci.checked }}" onchange="{{ ci.toggle }}" style="width:15px;height:15px;accent-color:#ff8a3d;cursor:pointer;"/>{{ ci.label }}
+                    </label>
+                    <div onclick="{{ ci.remove }}" style="color:#8c8064;cursor:pointer;">✕</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <input value="{{ workspace.newItemText }}" oninput="{{ setNewChecklistText }}" placeholder="Add checklist item..." style="flex:1;background:#ffffff;border:1px solid #ddd0b3;color:#2b2620;padding:8px 10px;border-radius:8px;font-size:12.5px;"/>
+                <div onclick="{{ addCustomChecklistItem }}" style="background:#ff8a3d;color:#100c08;font-weight:700;font-size:12.5px;padding:8px 14px;border-radius:8px;cursor:pointer;">Add</div>
+              </div>
+            </div>
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:16px;margin-bottom:12px;">
+              <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Confidence</div>
+              <div style="display:flex;gap:8px;">
+                <sc-for list="{{ workspace.confidenceOptions }}" as="cf" hint-placeholder-count="5">
+                  <div onclick="{{ cf.select }}" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;cursor:pointer;background:{{ cf.bg }};color:{{ cf.color }};">{{ cf.value }}</div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:16px;">
+              <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Quick Revision Notes</div>
+              <textarea oninput="{{ setChapterQuickNotes }}" rows="5" placeholder="Formulas, tricks, exceptions, common mistakes..." style="width:100%;background:#ffffff;border:1px solid #ddd0b3;color:#2b2620;padding:10px;border-radius:8px;font-size:12.5px;box-sizing:border-box;resize:vertical;">{{ workspace.quickNotes }}</textarea>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ================= DAILY TRACKER ================= -->
+      <sc-if value="{{ isDaily }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div style="font-size:22px;font-weight:800;margin-bottom:4px;">Daily Tracker</div>
+          <div style="color:#7d7260;font-size:13.5px;margin-bottom:18px;">Log your study sessions here.</div>
+          <div onclick="{{ openSessionModal }}" style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;margin-bottom:20px;">
+            <div style="font-size:26px;margin-bottom:6px;">＋</div>
+            <div style="font-size:13.5px;font-weight:700;">Log a study session</div>
+            <div style="font-size:12px;color:#7d7260;">Record subject, chapter, activity and duration</div>
+          </div>
+          <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;">
+            <div style="font-size:15px;font-weight:700;margin-bottom:12px;">Session History</div>
+            <sc-if value="{{ hasSessions }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <sc-for list="{{ sessionList }}" as="se" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid #e6dcc4;font-size:12.5px;">
+                    <span style="color:#7d7260;width:78px;flex:0 0 auto;font-family:'JetBrains Mono',monospace;">{{ se.date }}</span>
+                    <span style="flex:1;min-width:0;">{{ se.subject }} · {{ se.chapter }} · {{ se.type }}</span>
+                    <span style="font-weight:700;">{{ se.duration }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ noSessions }}" hint-placeholder-val="{{ true }}">
+              <div style="color:#7d7260;font-size:13px;">No study sessions yet. Start your first focus session to begin building your study history.</div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ================= QUESTIONS ================= -->
+      <sc-if value="{{ isQuestions }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div style="display:flex;align-items:center;margin-bottom:18px;">
+            <div style="font-size:22px;font-weight:800;">Question Practice</div>
+            <div onclick="{{ openQuestionModal }}" style="margin-left:auto;background:#ff8a3d;color:#100c08;font-weight:700;font-size:12.5px;padding:8px 14px;border-radius:8px;cursor:pointer;">+ Log Questions</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:12px;margin-bottom:18px;">
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:14px;"><div style="font-size:11.5px;color:#7d7260;">Today</div><div style="font-size:20px;font-weight:800;">{{ qToday }}</div></div>
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:14px;"><div style="font-size:11.5px;color:#7d7260;">This Week</div><div style="font-size:20px;font-weight:800;">{{ qWeek }}</div></div>
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:14px;"><div style="font-size:11.5px;color:#7d7260;">This Month</div><div style="font-size:20px;font-weight:800;">{{ qMonth }}</div></div>
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:14px;"><div style="font-size:11.5px;color:#7d7260;">Total</div><div style="font-size:20px;font-weight:800;">{{ qTotal }}</div></div>
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:14px;"><div style="font-size:11.5px;color:#7d7260;">Accuracy</div><div style="font-size:20px;font-weight:800;">{{ qAccuracy }}%</div></div>
+          </div>
+          <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;overflow-x:auto;">
+            <div style="font-size:15px;font-weight:700;margin-bottom:12px;">Log</div>
+            <sc-if value="{{ hasQuestionLog }}" hint-placeholder-val="{{ false }}">
+              <table style="width:100%;border-collapse:collapse;font-size:12.5px;min-width:600px;">
+                <thead><tr style="color:#7d7260;text-align:left;"><th style="padding:6px;">Date</th><th style="padding:6px;">Subject</th><th style="padding:6px;">Chapter</th><th style="padding:6px;">Attempted</th><th style="padding:6px;">Correct</th><th style="padding:6px;">Accuracy</th><th style="padding:6px;">Source</th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ questionLogRows }}" as="q" hint-placeholder-count="6">
+                    <tr style="border-top:1px solid #e6dcc4;"><td style="padding:7px 6px;">{{ q.date }}</td><td style="padding:7px 6px;">{{ q.subject }}</td><td style="padding:7px 6px;">{{ q.chapter }}</td><td style="padding:7px 6px;">{{ q.attempted }}</td><td style="padding:7px 6px;">{{ q.correct }}</td><td style="padding:7px 6px;font-weight:700;">{{ q.accuracy }}%</td><td style="padding:7px 6px;color:#7d7260;">{{ q.source }}</td></tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </sc-if>
+            <sc-if value="{{ noQuestionLog }}" hint-placeholder-val="{{ true }}">
+              <div style="color:#7d7260;font-size:13px;">No question logs yet.</div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ================= MOCK TESTS ================= -->
+      <sc-if value="{{ isMocks }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div style="display:flex;align-items:center;margin-bottom:18px;">
+            <div style="font-size:22px;font-weight:800;">Mock Tests</div>
+            <div onclick="{{ openMockModal }}" style="margin-left:auto;background:#ff8a3d;color:#100c08;font-weight:700;font-size:12.5px;padding:8px 14px;border-radius:8px;cursor:pointer;">+ Add Mock Test</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px;margin-bottom:18px;">
+            <sc-for list="{{ mockSubjectCards }}" as="ms" hint-placeholder-count="3">
+              <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:16px;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                  <div style="width:9px;height:9px;border-radius:50%;background:{{ ms.color }};"></div>
+                  <div style="font-size:13.5px;font-weight:700;">{{ ms.name }}</div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <div><div style="font-size:11px;color:#7d7260;">Mocks Taken</div><div style="font-size:16px;font-weight:800;">{{ ms.count }}</div></div>
+                  <div><div style="font-size:11px;color:#7d7260;">Avg Marks</div><div style="font-size:16px;font-weight:800;">{{ ms.avgMarks }}</div></div>
+                  <div style="grid-column:1/-1;"><div style="font-size:11px;color:#7d7260;">Avg Accuracy</div><div style="font-size:16px;font-weight:800;">{{ ms.accuracy }}%</div></div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ hasMocks }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;margin-bottom:18px;">
+              <div style="font-size:15px;font-weight:700;margin-bottom:14px;">Score Over Time</div>
+              <svg viewBox="0 0 600 160" style="width:100%;height:160px;overflow:visible;">
+                <polyline points="{{ mockScorePoints }}" fill="none" stroke="#ff8a3d" stroke-width="2.5"></polyline>
+                <sc-for list="{{ mockScoreDots }}" as="d" hint-placeholder-count="5">
+                  <circle cx="{{ d.x }}" cy="{{ d.y }}" r="3.5" fill="#ff8a3d"></circle>
+                </sc-for>
+              </svg>
+            </div>
+          </sc-if>
+          <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;overflow-x:auto;">
+            <div style="font-size:15px;font-weight:700;margin-bottom:12px;">History</div>
+            <sc-if value="{{ hasMocks }}" hint-placeholder-val="{{ false }}">
+              <table style="width:100%;border-collapse:collapse;font-size:12.5px;min-width:720px;">
+                <thead><tr style="color:#7d7260;text-align:left;"><th style="padding:6px;">Test</th><th style="padding:6px;">Type</th><th style="padding:6px;">Date</th><th style="padding:6px;">Chapters</th><th style="padding:6px;">Total</th><th style="padding:6px;">%</th><th style="padding:6px;">Accuracy</th><th style="padding:6px;">Phy</th><th style="padding:6px;">Chem</th><th style="padding:6px;">Math</th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ mockRows }}" as="m" hint-placeholder-count="4">
+                    <tr style="border-top:1px solid #e6dcc4;"><td style="padding:7px 6px;font-weight:600;">{{ m.name }}</td><td style="padding:7px 6px;">{{ m.type }}</td><td style="padding:7px 6px;">{{ m.date }}</td><td style="padding:7px 6px;">{{ m.chapters }}</td><td style="padding:7px 6px;">{{ m.total }}</td><td style="padding:7px 6px;font-weight:700;color:#ff8a3d;">{{ m.pct }}%</td><td style="padding:7px 6px;">{{ m.accuracy }}%</td><td style="padding:7px 6px;">{{ m.phy }}</td><td style="padding:7px 6px;">{{ m.chem }}</td><td style="padding:7px 6px;">{{ m.math }}</td></tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </sc-if>
+            <sc-if value="{{ noMocks }}" hint-placeholder-val="{{ true }}">
+              <div style="color:#7d7260;font-size:13px;">No mock tests logged yet.</div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ================= ANALYTICS ================= -->
+      <sc-if value="{{ isAnalytics }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div style="display:flex;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+            <div style="font-size:22px;font-weight:800;">Analytics</div>
+            <div style="margin-left:auto;display:flex;gap:6px;">
+              <sc-for list="{{ rangeOptions }}" as="ro" hint-placeholder-count="4">
+                <div onclick="{{ ro.select }}" style="padding:6px 12px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;background:{{ ro.bg }};color:{{ ro.color }};">{{ ro.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,130px),1fr));gap:12px;margin-bottom:18px;">
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:14px;"><div style="font-size:11px;color:#7d7260;">Study Hours</div><div style="font-size:19px;font-weight:800;">{{ rangeHours }}h</div></div>
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:14px;"><div style="font-size:11px;color:#7d7260;">Questions</div><div style="font-size:19px;font-weight:800;">{{ rangeQuestions }}</div></div>
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:14px;"><div style="font-size:11px;color:#7d7260;">Chapters Done</div><div style="font-size:19px;font-weight:800;">{{ rangeChapters }}</div></div>
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:14px;"><div style="font-size:11px;color:#7d7260;">Mocks</div><div style="font-size:19px;font-weight:800;">{{ rangeMocks }}</div></div>
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:14px;"><div style="font-size:11px;color:#7d7260;">Avg Accuracy</div><div style="font-size:19px;font-weight:800;">{{ rangeAccuracy }}%</div></div>
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:14px;"><div style="font-size:11px;color:#7d7260;">Avg Daily Study</div><div style="font-size:19px;font-weight:800;">{{ rangeAvgDaily }}</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px;margin-bottom:14px;">
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;">
+              <div style="font-size:14px;font-weight:700;margin-bottom:14px;">Subject Distribution</div>
+              <div style="display:flex;align-items:center;gap:20px;">
+                <svg viewBox="0 0 42 42" style="width:130px;height:130px;">
+                  <circle cx="21" cy="21" r="15.9" fill="transparent" stroke="#e6dcc4" stroke-width="6"></circle>
+                  <sc-for list="{{ donutSegments }}" as="seg" hint-placeholder-count="3">
+                    <circle cx="21" cy="21" r="15.9" fill="transparent" stroke="{{ seg.color }}" stroke-width="6" stroke-dasharray="{{ seg.dash }}" stroke-dashoffset="{{ seg.offset }}" transform="rotate(-90 21 21)"></circle>
+                  </sc-for>
+                </svg>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <sc-for list="{{ donutLegend }}" as="l" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;gap:7px;font-size:12.5px;"><div style="width:9px;height:9px;border-radius:50%;background:{{ l.color }};"></div>{{ l.label }}</div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;">
+              <div style="font-size:14px;font-weight:700;margin-bottom:14px;">Questions Per Day</div>
+              <svg viewBox="0 0 300 130" style="width:100%;height:130px;">
+                <polyline points="{{ questionsPerDayPoints }}" fill="none" stroke="#ff8a3d" stroke-width="2"></polyline>
+              </svg>
+            </div>
+          </div>
+          <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;">
+            <div style="font-size:14px;font-weight:700;margin-bottom:14px;">Chapter Completion by Subject</div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <sc-for list="{{ subjectCards }}" as="sc" hint-placeholder-count="3">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px;"><span>{{ sc.name }}</span><span style="font-weight:700;">{{ sc.pct }}%</span></div>
+                  <div style="height:8px;background:#e6dcc4;border-radius:4px;overflow:hidden;"><div style="height:100%;width:{{ sc.pct }}%;background:{{ sc.color }};"></div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+
+      <!-- ================= SETTINGS ================= -->
+      <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:560px;">
+          <div style="font-size:22px;font-weight:800;margin-bottom:18px;">Settings</div>
+          <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;margin-bottom:14px;">
+            <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Profile</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div><div style="font-size:11.5px;color:#7d7260;margin-bottom:4px;">Name</div><input value="{{ settings.name }}" oninput="{{ setName }}" style="width:100%;background:#ffffff;border:1px solid #ddd0b3;color:#2b2620;padding:8px 10px;border-radius:8px;font-size:12.5px;"/></div>
+              <div><div style="font-size:11.5px;color:#7d7260;margin-bottom:4px;">Target Exam</div><input value="{{ settings.targetExam }}" oninput="{{ setTargetExam }}" style="width:100%;background:#ffffff;border:1px solid #ddd0b3;color:#2b2620;padding:8px 10px;border-radius:8px;font-size:12.5px;"/></div>
+              <div><div style="font-size:11.5px;color:#7d7260;margin-bottom:4px;">Target Year</div><input type="number" value="{{ settings.targetYear }}" oninput="{{ setTargetYear }}" style="width:100%;background:#ffffff;border:1px solid #ddd0b3;color:#2b2620;padding:8px 10px;border-radius:8px;font-size:12.5px;"/></div>
+              <div><div style="font-size:11.5px;color:#7d7260;margin-bottom:4px;">Daily Study Target (minutes)</div><input type="number" value="{{ settings.dailyStudyTargetMin }}" oninput="{{ setDailyStudyTarget }}" style="width:100%;background:#ffffff;border:1px solid #ddd0b3;color:#2b2620;padding:8px 10px;border-radius:8px;font-size:12.5px;"/></div>
+              <div><div style="font-size:11.5px;color:#7d7260;margin-bottom:4px;">Daily Question Target</div><input type="number" value="{{ settings.dailyQuestionTarget }}" oninput="{{ setDailyQuestionTarget }}" style="width:100%;background:#ffffff;border:1px solid #ddd0b3;color:#2b2620;padding:8px 10px;border-radius:8px;font-size:12.5px;"/></div>
+            </div>
+          </div>
+          <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:14px;padding:18px;margin-bottom:14px;">
+            <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Data</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div onclick="{{ exportData }}" style="background:#efe4cd;padding:10px;border-radius:8px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;">Export Data (JSON backup)</div>
+              <label style="background:#efe4cd;padding:10px;border-radius:8px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;display:block;">
+                Import Data
+                <input type="file" accept="application/json" onchange="{{ importData }}" style="display:none;"/>
+              </label>
+              <div onclick="{{ loadDemoData }}" style="background:#efe4cd;padding:10px;border-radius:8px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;">Load Demo Data</div>
+              <div onclick="{{ confirmReset }}" style="background:#fce4e4;color:#b23838;padding:10px;border-radius:8px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;">Reset All Data</div>
+            </div>
+          </div>
+          <div style="font-size:11.5px;color:#8c8064;">All data is stored locally in your browser. Nothing leaves your device.</div>
+        </div>
+      </sc-if>
+
+    </main>
+  </div>
+
+  <!-- SEARCH MODAL -->
+  <sc-if value="{{ searchOpen }}" hint-placeholder-val="{{ false }}">
+    <div onclick="{{ closeSearch }}" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:60;display:flex;align-items:flex-start;justify-content:center;padding-top:100px;">
+      <div onclick="{{ stopProp }}" style="background:#fffdf8;border:1px solid #ddd0b3;border-radius:14px;width:min(560px,92vw);padding:16px;box-shadow:0 24px 60px rgba(0,0,0,0.6);">
+        <input type="search" aria-label="Search chapters, tasks and mock tests" autofocus="{{ true }}" value="{{ searchQuery }}" oninput="{{ setSearchQuery }}" placeholder="Search chapters, tasks, mock tests..." style="width:100%;background:#ffffff;border:1px solid #ddd0b3;color:#2b2620;padding:11px 14px;border-radius:9px;font-size:14px;box-sizing:border-box;"/>
+        <div style="margin-top:10px;max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;">
+          <sc-for list="{{ searchResults }}" as="r" hint-placeholder-count="0">
+            <div onclick="{{ r.go }}" style="padding:10px 12px;border-radius:8px;cursor:pointer;font-size:13px;display:flex;justify-content:space-between;">
+              <span>{{ r.label }}</span><span style="color:#7d7260;font-size:11px;">{{ r.kind }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- GENERIC MODAL -->
+  <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onclick="{{ closeModal }}" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;">
+      <div onclick="{{ stopProp }}" style="background:#fffdf8;border:1px solid #ddd0b3;border-radius:16px;width:min(440px,94vw);padding:20px;max-height:88vh;overflow-y:auto;">
+        <h2 style="margin:0 0 14px 0;font-size:15px;font-weight:800;">{{ modalTitle }}</h2>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <sc-for list="{{ modalFields }}" as="f" hint-placeholder-count="6">
+            <div>
+              <div style="font-size:11.5px;color:#7d7260;margin-bottom:4px;">{{ f.label }}</div>
+              <sc-if value="{{ f.isSelect }}" hint-placeholder-val="{{ false }}">
+                <select onchange="{{ f.onChange }}" style="width:100%;background:#ffffff;border:1px solid #ddd0b3;color:#2b2620;padding:9px 10px;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                  <sc-for list="{{ f.options }}" as="opt" hint-placeholder-count="4">
+                    <option value="{{ opt.value }}" selected="{{ opt.isSel }}">{{ opt.label }}</option>
+                  </sc-for>
+                </select>
+              </sc-if>
+              <sc-if value="{{ f.isTextarea }}" hint-placeholder-val="{{ false }}">
+                <textarea oninput="{{ f.onChange }}" rows="4" style="width:100%;background:#ffffff;border:1px solid #ddd0b3;color:#2b2620;padding:9px 10px;border-radius:8px;font-size:13px;box-sizing:border-box;resize:vertical;">{{ f.value }}</textarea>
+              </sc-if>
+              <sc-if value="{{ f.isChapterPicker }}" hint-placeholder-val="{{ false }}">
+                <div onclick="{{ f.toggleOpen }}" style="width:100%;background:#ffffff;border:1px solid #ddd0b3;color:#2b2620;padding:9px 10px;border-radius:8px;font-size:12.5px;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+                  <span>{{ f.summary }}</span><span>{{ f.caret }}</span>
+                </div>
+                <sc-if value="{{ f.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="max-height:150px;overflow-y:auto;border:1px solid #ddd0b3;border-radius:8px;margin-top:6px;padding:8px;display:flex;flex-direction:column;gap:6px;">
+                    <sc-for list="{{ f.items }}" as="it" hint-placeholder-count="6">
+                      <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#3a332a;cursor:pointer;">
+                        <input type="checkbox" checked="{{ it.checked }}" onchange="{{ it.toggle }}" style="width:14px;height:14px;accent-color:#ff8a3d;cursor:pointer;"/>{{ it.label }}
+                      </label>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </sc-if>
+              <sc-if value="{{ f.isInput }}" hint-placeholder-val="{{ true }}">
+                <input type="{{ f.inputType }}" value="{{ f.value }}" oninput="{{ f.onChange }}" style="width:100%;background:#ffffff;border:1px solid #ddd0b3;color:#2b2620;padding:9px 10px;border-radius:8px;font-size:13px;box-sizing:border-box;"/>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:18px;">
+          <button type="button" onclick="{{ closeModal }}" style="border:none;font:inherit;color:inherit;flex:1;text-align:center;background:#e6dcc4;padding:10px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>
+          <button type="button" onclick="{{ submitModal }}" style="border:none;font:inherit;flex:1;text-align:center;background:linear-gradient(135deg,#ff8a3d,#ff5e1a);color:#100c08;padding:10px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;">Save</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- RESET CONFIRM -->
+  <sc-if value="{{ resetConfirmOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:70;display:flex;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:#fffdf8;border:1px solid #ddd0b3;border-radius:14px;width:min(380px,92vw);padding:20px;text-align:center;">
+        <div style="font-size:15px;font-weight:800;margin-bottom:8px;">Reset all data?</div>
+        <div style="font-size:13px;color:#7d7260;margin-bottom:18px;">This deletes all tasks, sessions, questions, mocks and progress. This cannot be undone.</div>
+        <div style="display:flex;gap:8px;">
+          <button type="button" onclick="{{ cancelReset }}" style="border:none;font:inherit;color:inherit;flex:1;background:#e6dcc4;padding:10px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>
+          <button type="button" onclick="{{ doReset }}" style="border:none;font:inherit;flex:1;background:#7a1f1f;color:#ffb8b8;padding:10px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;">Reset</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- TOAST -->
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div role="status" aria-live="polite" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#efe4cd;border:1px solid #e0d3b3;color:#2b2620;padding:11px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:80;animation:toastin 0.2s ease;">{{ toastMessage }}</div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const LS_KEY = 'jee-tracker-data-v1';
+
+const PHYSICS = ["Units and Measurements","Kinematics","Laws of Motion","Work, Energy and Power","System of Particles and Rotational Motion","Gravitation","Properties of Bulk Matter","Thermodynamics","Kinetic Theory","Oscillations","Waves","Electrostatics","Current Electricity","Magnetic Effects of Current","Magnetism","Electromagnetic Induction","Alternating Current","Electromagnetic Waves","Optics","Dual Nature of Matter","Atoms","Nuclei","Semiconductor Electronics"];
+const CHEM_PHYSICAL = ["Mole Concept","Atomic Structure","Chemical Bonding","States of Matter","Thermodynamics","Equilibrium","Redox Reactions","Electrochemistry","Chemical Kinetics","Solutions","Surface Chemistry"];
+const CHEM_ORGANIC = ["Basic Organic Chemistry","Hydrocarbons","Haloalkanes and Haloarenes","Alcohols Phenols Ethers","Aldehydes and Ketones","Carboxylic Acids","Amines","Biomolecules","Polymers"];
+const CHEM_INORGANIC = ["Periodic Table","s-Block Elements","p-Block Elements","d and f Block Elements","Coordination Compounds","Metallurgy","Qualitative Analysis"];
+const MATH = ["Sets","Relations and Functions","Quadratic Equations","Sequence and Series","Trigonometry","Complex Numbers","Permutations and Combinations","Binomial Theorem","Straight Lines","Circles","Conic Sections","Limits","Continuity","Differentiability","Application of Derivatives","Indefinite Integration","Definite Integration","Differential Equations","Matrices","Determinants","Vector Algebra","3D Geometry","Probability","Statistics"];
+
+const SUBJECT_COLOR = { Physics:'#5b8def', Chemistry:'#1f9d5c', Mathematics:'#a78bfa' };
+const ACTIVITY_TYPES = ['Lecture','Revision','Questions','PYQs','Mock Test','Notes'];
+const SOURCE_OPTIONS = ['JEE Main PYQ','JEE Advanced PYQ','Coaching Module','NCERT','Reference Book','Mock Test','Other'];
+const TEST_TYPE_SUBJECTS = {
+  'Physics Only': ['Physics'], 'Chemistry Only': ['Chemistry'], 'Maths Only': ['Mathematics'],
+  'Physics + Chemistry': ['Physics','Chemistry'], 'Physics + Maths': ['Physics','Mathematics'], 'Chemistry + Maths': ['Chemistry','Mathematics'],
+  'Full (P+C+M)': ['Physics','Chemistry','Mathematics']
+};
+const SUBJECT_FIELD = { Physics:'physics', Chemistry:'chemistry', Mathematics:'maths' };
+const CHECKLIST_SECTIONS = [
+  {key:'theory', title:'Theory & Concepts', items:['Theory completed','All lectures completed','Class notes completed','NCERT read','Important concepts marked','Important formulas learned','Formula sheet created','Short notes created']},
+  {key:'basic', title:'Basic Practice', items:['Solved examples','Basic questions completed','Coaching homework completed','DPP completed','DPP mistakes reviewed']},
+  {key:'module', title:'Module Practice', items:['Module Level 1 completed','Module Level 2 completed','Advanced-level module questions completed','Marked difficult questions']},
+  {key:'main', title:'JEE Main', items:['JEE Main PYQs completed','JEE Main PYQs analyzed','JEE Main timed practice completed','JEE Main chapter test completed']},
+  {key:'advanced', title:'JEE Advanced', items:['JEE Advanced PYQs completed','Advanced-level practice completed','Advanced questions analyzed','Advanced chapter test completed']},
+  {key:'revision', title:'Revision', items:['Revision 1','Revision 2','Revision 3','Revision 4','Revision 5','Formula revision','Short notes revision']},
+  {key:'testing', title:'Testing', items:['Chapter test','Timed test','Mixed-topic test','Accuracy analyzed','Mistakes analyzed','Weak concepts identified']}
+];
+
+function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
+function todayISO(){ const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+function isoDaysAgo(n){ const d=new Date(); d.setDate(d.getDate()-n); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+function fmtDate(iso){ if(!iso) return '—'; const d=new Date(iso+'T00:00:00'); if(isNaN(d)) return iso; const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear(); }
+function minsToLabel(m){ m=Math.round(m||0); const h=Math.floor(m/60); const mm=m%60; if(h<=0) return mm+'m'; return h+'h '+mm+'m'; }
+function clamp(n,a,b){ return Math.max(a,Math.min(b,n)); }
+
+function seedChapters(){
+  const out = [];
+  let i=0;
+  PHYSICS.forEach(name=>out.push(mkChapter('phy-'+(i++),'Physics',name,null)));
+  CHEM_PHYSICAL.forEach(name=>out.push(mkChapter('chem-'+(i++),'Chemistry',name,'Physical')));
+  CHEM_ORGANIC.forEach(name=>out.push(mkChapter('chem-'+(i++),'Chemistry',name,'Organic')));
+  CHEM_INORGANIC.forEach(name=>out.push(mkChapter('chem-'+(i++),'Chemistry',name,'Inorganic')));
+  MATH.forEach(name=>out.push(mkChapter('math-'+(i++),'Mathematics',name,null)));
+  return out;
+}
+function mkChapter(id,subject,name,category){
+  return { id, subject, name, category, checklist:{}, customChecklist:[], confidence:3, quickNotes:'', lastStudied:null };
+}
+function sectionCompletion(c, sec){
+  const done = sec.items.filter((_,i)=> c.checklist && c.checklist[sec.key+'|'+i]).length;
+  return { done, total: sec.items.length };
+}
+function chapterCompletion(c){
+  const fixedTotal = CHECKLIST_SECTIONS.reduce((a,sec)=>a+sec.items.length,0);
+  const customTotal = (c.customChecklist||[]).length;
+  const total = fixedTotal+customTotal;
+  if(total===0) return 0;
+  let done = CHECKLIST_SECTIONS.reduce((a,sec)=>a+sectionCompletion(c,sec).done,0);
+  done += (c.customChecklist||[]).filter(ci=>ci.checked).length;
+  return Math.round(done/total*100);
+}
+function readiness(c, sectionKeys){
+  const secs = CHECKLIST_SECTIONS.filter(s=>sectionKeys.includes(s.key));
+  const total = secs.reduce((a,s)=>a+s.items.length,0);
+  if(total===0) return 0;
+  const done = secs.reduce((a,s)=>a+sectionCompletion(c,s).done,0);
+  return Math.round(done/total*100);
+}
+function defaultData(){
+  return {
+    settings:{ name:'Aspirant', targetExam:'JEE Main + Advanced', targetYear:2027, dailyStudyTargetMin:360, dailyQuestionTarget:100, pomodoroWork:25, pomodoroBreak:5, weekStart:'Monday' },
+    chapters: seedChapters(),
+    tasks: [], studySessions: [], questions: [], mockTests: [], weeklyTargets: [],
+    xp: 0
+  };
+}
+function loadData(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return defaultData();
+    const parsed = JSON.parse(raw);
+    const d = defaultData();
+    return Object.assign(d, parsed, { chapters: (parsed.chapters && parsed.chapters.length) ? parsed.chapters : d.chapters });
+  }catch(e){ return defaultData(); }
+}
+
+const PAGE_KEYS = ['dashboard','planner','subjects','chapters','daily','questions','mocks','analytics','settings'];
+const PAGE_TITLES = {dashboard:'Dashboard',planner:'Weekly Target',subjects:'Subjects',chapters:'Chapters',daily:'Daily Tracker',questions:'Question Practice',mocks:'Mock Tests',analytics:'Analytics',settings:'Settings'};
+function pageFromHash(){
+  try{ const k = (location.hash||'').replace(/^#\/?/,''); return PAGE_KEYS.includes(k) ? k : 'dashboard'; }catch(e){ return 'dashboard'; }
+}
+function titleForPage(p){ return (PAGE_TITLES[p]||'Dashboard')+' – JEE Study Tracker'; }
+
+class Component extends DCLogic {
+  state = {
+    page: pageFromHash(),
+    data: loadData(),
+    modal: null,
+    formDraft: {},
+    toast: null,
+    searchOpen:false, searchQuery:'',
+    quickOpen:false,
+    analyticsRange:'30',
+    chapterFilter:'Physics',
+    sidebarOpen:false,
+    resetConfirmOpen:false,
+    selectedChapterId:null,
+    newChecklistText:'',
+    chapterPickerOpen:{}
+  };
+
+  componentDidMount(){
+    this._kd = (e)=>{
+      if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); this.setState({searchOpen:true}); }
+      if(e.key==='Escape'){ this.setState({searchOpen:false, modal:null, quickOpen:false}); }
+    };
+    window.addEventListener('keydown', this._kd);
+    // keep the URL hash and document title in sync with the current page
+    this._pop = ()=>{ const p = pageFromHash(); this._syncedPage = p; if(p!==this.state.page) this.setState({page:p}); document.title = titleForPage(p); };
+    window.addEventListener('popstate', this._pop);
+    this._rs = ()=>{ const n = window.innerWidth < 900; if(n!==this._narrow){ this._narrow = n; this.setState(n ? {} : {sidebarOpen:false}); } };
+    this._narrow = window.innerWidth < 900;
+    window.addEventListener('resize', this._rs);
+    this._syncedPage = this.state.page;
+    document.title = titleForPage(this.state.page);
+  }
+  componentDidUpdate(){
+    const p = this.state.page;
+    if(p === this._syncedPage) return;
+    this._syncedPage = p;
+    try{ history.pushState(null, '', '#/'+p); }catch(e){}
+    document.title = titleForPage(p);
+  }
+  componentWillUnmount(){
+    window.removeEventListener('keydown', this._kd);
+    window.removeEventListener('popstate', this._pop);
+    window.removeEventListener('resize', this._rs);
+  }
+
+  persist(patch){
+    this.setState(s=>{
+      const data = Object.assign({}, s.data, patch(s.data));
+      try{ localStorage.setItem(LS_KEY, JSON.stringify(data)); }catch(e){}
+      return { data };
+    });
+  }
+  toast(msg){
+    this.setState({toast: msg});
+    clearTimeout(this._toastT);
+    this._toastT = setTimeout(()=>this.setState({toast:null}), 2400);
+  }
+
+  goPage(p){ return (e)=>{ if(e && e.preventDefault) e.preventDefault(); this.setState({page:p, quickOpen:false, sidebarOpen:false}); }; }
+
+  // ---------- TASKS ----------
+  openTaskModal(){ this.setState({ modal:'task', formDraft:{ subject:'Physics', chapter:'', title:'', priority:'Medium', date: todayISO() }, quickOpen:false }); }
+  openSessionModal(){ this.setState({ modal:'session', formDraft:{ subject:'Physics', chapter:'', duration:60, type:'Lecture', date: todayISO() }, quickOpen:false }); }
+  openQuestionModal(){ this.setState({ modal:'question', formDraft:{ subject:'Physics', chapter:'', attempted:10, correct:7, incorrect:3, skipped:0, difficulty:'Medium', source:'Coaching Module', date: todayISO() }, quickOpen:false }); }
+  openMockModal(){ this.setState({ modal:'mock', formDraft:{ name:'', date: todayISO(), examType:'JEE Main', testType:'Full (P+C+M)', chapters_physics:[], chapters_chemistry:[], chapters_maths:[], physics:0, physicsCorrect:0, physicsIncorrect:0, chemistry:0, chemistryCorrect:0, chemistryIncorrect:0, maths:0, mathsCorrect:0, mathsIncorrect:0, unattempted:0, timeTaken:180 }, quickOpen:false }); }
+  openTargetModal(){ this.setState({ modal:'target', formDraft:{ type:'Chapter Completion', subject:'Physics', title:'', deadline: isoDaysAgo(-7) }, quickOpen:false }); }
+  closeModal(){ this.setState({modal:null}); }
+  stopProp(e){ if(e && e.stopPropagation) e.stopPropagation(); }
+  setDraft(key){ return (e)=>{ const v = e && e.target ? e.target.value : e; this.setState(s=>({formDraft: Object.assign({}, s.formDraft, {[key]:v})})); }; }
+  setDraftMulti(key){ return (e)=>{ const vals = Array.from(e.target.selectedOptions).map(o=>o.value); this.setState(s=>({formDraft: Object.assign({}, s.formDraft, {[key]:vals})})); }; }
+  toggleChapterPicker(key){ return ()=>{ this.setState(s=>({chapterPickerOpen: Object.assign({}, s.chapterPickerOpen, {[key]: !s.chapterPickerOpen[key]})})); }; }
+  toggleDraftChapter(key, name){ return ()=>{ this.setState(s=>{ const cur = s.formDraft[key]||[]; const next = cur.includes(name) ? cur.filter(n=>n!==name) : [...cur, name]; return { formDraft: Object.assign({}, s.formDraft, {[key]: next}) }; }); }; }
+
+  submitModal(){
+    const m = this.state.modal;
+    const f = this.state.formDraft;
+    if(m==='task'){
+      if(!f.title){ this.toast('Enter a task title'); return; }
+      this.persist(d=>({ tasks: [...d.tasks, { id:uid(), subject:f.subject, chapter:f.chapter||'—', title:f.title, duration:0, priority:f.priority||'Medium', date:f.date||todayISO(), status:'Pending' }] }));
+      this.toast('Task added.');
+    } else if(m==='session'){
+      const mins = Number(f.duration)||0;
+      if(mins<=0){ this.toast('Enter a valid duration'); return; }
+      this.persist(d=>({ studySessions:[...d.studySessions,{ id:uid(), date:f.date||todayISO(), duration:mins, subject:f.subject, chapter:f.chapter||'—', type:f.type }] }));
+      this.toast('Study session saved.');
+    } else if(m==='question'){
+      const att=Number(f.attempted)||0, cor=Number(f.correct)||0, inc=Number(f.incorrect)||0;
+      if(att<=0){ this.toast('Enter attempted count'); return; }
+      this.persist(d=>({ questions:[...d.questions,{ id:uid(), date:f.date||todayISO(), subject:f.subject, chapter:f.chapter||'—', attempted:att, correct:clamp(cor,0,att), incorrect:clamp(inc,0,att), skipped:Number(f.skipped)||0, difficulty:f.difficulty, source:f.source }] }));
+      this.toast('Questions logged.');
+    } else if(m==='mock'){
+      if(!f.name){ this.toast('Enter a test name'); return; }
+      const includedSubjects = TEST_TYPE_SUBJECTS[f.testType] || TEST_TYPE_SUBJECTS['Full (P+C+M)'];
+      const inc = s => includedSubjects.includes(s);
+      const chaptersCombined = [...(f.chapters_physics||[]), ...(f.chapters_chemistry||[]), ...(f.chapters_maths||[])].join(', ');
+      this.persist(d=>({ mockTests:[...d.mockTests,{ id:uid(), name:f.name, date:f.date||todayISO(), examType:f.examType, testType:f.testType, subjects: includedSubjects, chaptersCovered:chaptersCombined,
+        physics: inc('Physics')?Number(f.physics)||0:0, physicsCorrect: inc('Physics')?Number(f.physicsCorrect)||0:0, physicsIncorrect: inc('Physics')?Number(f.physicsIncorrect)||0:0,
+        chemistry: inc('Chemistry')?Number(f.chemistry)||0:0, chemistryCorrect: inc('Chemistry')?Number(f.chemistryCorrect)||0:0, chemistryIncorrect: inc('Chemistry')?Number(f.chemistryIncorrect)||0:0,
+        maths: inc('Mathematics')?Number(f.maths)||0:0, mathsCorrect: inc('Mathematics')?Number(f.mathsCorrect)||0:0, mathsIncorrect: inc('Mathematics')?Number(f.mathsIncorrect)||0:0,
+        unattempted:Number(f.unattempted)||0, timeTaken:Number(f.timeTaken)||0 }] }));
+      this.toast('Mock test added.');
+    } else if(m==='target'){
+      if(!f.title){ this.toast('Enter a title'); return; }
+      this.persist(d=>({ weeklyTargets:[...d.weeklyTargets,{ id:uid(), type:f.type, subject:f.subject, title:f.title, deadline:f.deadline||todayISO(), done:false }] }));
+      this.toast('Target added.');
+    }
+    this.setState({modal:null});
+  }
+
+  toggleTask(id){ return ()=>{ this.persist(d=>({ tasks: d.tasks.map(t=>t.id===id?Object.assign({},t,{status: t.status==='Completed'?'Pending':'Completed'}):t) })); }; }
+  removeTask(id){ return ()=>{ this.persist(d=>({ tasks: d.tasks.filter(t=>t.id!==id) })); this.toast('Task removed.'); }; }
+  removeTarget(id){ return ()=>{ this.persist(d=>({ weeklyTargets: d.weeklyTargets.filter(t=>t.id!==id) })); }; }
+  toggleTarget(id){ return ()=>{ this.persist(d=>({ weeklyTargets: d.weeklyTargets.map(t=>t.id===id?Object.assign({},t,{done:!t.done}):t) })); }; }
+
+  openChapterWorkspace(id){ return ()=>this.setState({selectedChapterId:id, newChecklistText:''}); }
+  closeChapterWorkspace(){ this.setState({selectedChapterId:null}); }
+  toggleChecklistItem(chapterId, sectionKey, idx){ return ()=>{ const key = sectionKey+'|'+idx; this.persist(d=>({ chapters: d.chapters.map(c=>c.id===chapterId ? Object.assign({},c,{checklist: Object.assign({}, c.checklist, {[key]: !(c.checklist&&c.checklist[key])}), lastStudied: todayISO()}) : c) })); }; }
+  setNewChecklistText(e){ this.setState({newChecklistText: e.target.value}); }
+  addCustomChecklistItem(){
+    const text = (this.state.newChecklistText||'').trim();
+    const id = this.state.selectedChapterId;
+    if(!text || !id) return;
+    const itemId = uid();
+    this.persist(d=>({ chapters: d.chapters.map(c=>c.id===id ? Object.assign({},c,{customChecklist:[...(c.customChecklist||[]),{id:itemId,label:text,checked:false}]}) : c) }));
+    this.setState({newChecklistText:''});
+  }
+  toggleCustomChecklistItem(chapterId,itemId){ return ()=>{ this.persist(d=>({ chapters: d.chapters.map(c=>c.id===chapterId? Object.assign({},c,{customChecklist:(c.customChecklist||[]).map(ci=>ci.id===itemId?Object.assign({},ci,{checked:!ci.checked}):ci)}) : c) })); }; }
+  removeCustomChecklistItem(chapterId,itemId){ return ()=>{ this.persist(d=>({ chapters: d.chapters.map(c=>c.id===chapterId? Object.assign({},c,{customChecklist:(c.customChecklist||[]).filter(ci=>ci.id!==itemId)}) : c) })); }; }
+  setChapterConfidence(chapterId,val){ return ()=>{ this.persist(d=>({ chapters: d.chapters.map(c=>c.id===chapterId?Object.assign({},c,{confidence:val}):c) })); }; }
+  setChapterQuickNotes(e){ const val=e.target.value; const id=this.state.selectedChapterId; if(!id) return; this.persist(d=>({ chapters: d.chapters.map(c=>c.id===id?Object.assign({},c,{quickNotes:val}):c) })); }
+
+  setChapterFilter(f){ return ()=>this.setState({chapterFilter:f}); }
+  setNoteSearch(e){ this.setState({noteSearch:e.target.value}); }
+  setAnalyticsRange(r){ return ()=>this.setState({analyticsRange:r}); }
+
+  // ---------- SEARCH ----------
+  openSearch(){ this.setState({searchOpen:true}); }
+  closeSearch(){ this.setState({searchOpen:false, searchQuery:''}); }
+  setSearchQuery(e){ this.setState({searchQuery:e.target.value}); }
+
+  // ---------- QUICK ----------
+  toggleQuick(){ this.setState(s=>({quickOpen:!s.quickOpen})); }
+  openSidebar(){ this.setState({sidebarOpen:true}); }
+  closeSidebar(){ this.setState({sidebarOpen:false}); }
+
+  // ---------- SETTINGS FIELDS ----------
+  setName(e){ this.persist(d=>({settings:Object.assign({},d.settings,{name:e.target.value})})); }
+  setTargetExam(e){ this.persist(d=>({settings:Object.assign({},d.settings,{targetExam:e.target.value})})); }
+  setTargetYear(e){ this.persist(d=>({settings:Object.assign({},d.settings,{targetYear:Number(e.target.value)})})); }
+  setDailyStudyTarget(e){ this.persist(d=>({settings:Object.assign({},d.settings,{dailyStudyTargetMin:Number(e.target.value)})})); }
+  setDailyQuestionTarget(e){ this.persist(d=>({settings:Object.assign({},d.settings,{dailyQuestionTarget:Number(e.target.value)})})); }
+
+  exportData(){
+    const blob = new Blob([JSON.stringify(this.state.data,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download='jee-tracker-backup.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    this.toast('Backup exported.');
+  }
+  importData(e){
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const parsed = JSON.parse(reader.result);
+        if(!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.chapters)){ this.toast('Invalid backup file.'); return; }
+        const merged = Object.assign(defaultData(), parsed);
+        this.setState({data: merged});
+        try{ localStorage.setItem(LS_KEY, JSON.stringify(merged)); }catch(err){}
+        this.toast('Data imported successfully.');
+      }catch(err){ this.toast('Invalid JSON file.'); }
+    };
+    reader.readAsText(file);
+    e.target.value='';
+  }
+  confirmReset(){ this.setState({resetConfirmOpen:true}); }
+  cancelReset(){ this.setState({resetConfirmOpen:false}); }
+  doReset(){
+    const fresh = defaultData();
+    this.setState({data:fresh, resetConfirmOpen:false});
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(fresh)); }catch(e){}
+    this.toast('All data has been reset.');
+  }
+  loadDemoData(){
+    const d = defaultData();
+    d.settings.name = 'Aspirant';
+    for(let i=0;i<10;i++){
+      const day = isoDaysAgo(i);
+      d.studySessions.push({id:uid(),date:day,duration:60+ (i%3)*30,subject: i%3===0?'Physics':i%3===1?'Chemistry':'Mathematics',chapter:'Practice',type: i%2===0?'Questions':'Lecture'});
+    }
+    d.questions.push({id:uid(),date:todayISO(),subject:'Physics',chapter:'Rotational Motion',attempted:25,correct:12,incorrect:13,skipped:0,difficulty:'Hard',source:'Coaching Module'});
+    d.questions.push({id:uid(),date:isoDaysAgo(1),subject:'Mathematics',chapter:'Integration',attempted:40,correct:22,incorrect:18,skipped:0,difficulty:'Medium',source:'JEE Main PYQ'});
+    d.questions.push({id:uid(),date:isoDaysAgo(2),subject:'Chemistry',chapter:'Chemical Bonding',attempted:30,correct:16,incorrect:14,skipped:0,difficulty:'Medium',source:'NCERT'});
+    d.mockTests.push({id:uid(),name:'Full Mock 1',date:isoDaysAgo(10),examType:'JEE Main',testType:'Full (P+C+M)',subjects:['Physics','Chemistry','Mathematics'],chaptersCovered:'Full syllabus',physics:65,physicsCorrect:19,physicsIncorrect:6,chemistry:70,chemistryCorrect:20,chemistryIncorrect:5,maths:58,mathsCorrect:16,mathsIncorrect:9,unattempted:15,timeTaken:180});
+    d.mockTests.push({id:uid(),name:'Full Mock 2',date:isoDaysAgo(3),examType:'JEE Main',testType:'Full (P+C+M)',subjects:['Physics','Chemistry','Mathematics'],chaptersCovered:'Full syllabus',physics:75,physicsCorrect:22,physicsIncorrect:4,chemistry:80,chemistryCorrect:23,chemistryIncorrect:3,maths:70,mathsCorrect:20,mathsIncorrect:5,unattempted:7,timeTaken:180});
+    d.chapters = d.chapters.map((c,i)=>{
+      if(i%4===0){
+        const checklist={}; CHECKLIST_SECTIONS.forEach(sec=>sec.items.forEach((_,idx)=>{ checklist[sec.key+'|'+idx]=true; }));
+        return Object.assign({},c,{checklist, confidence:5, lastStudied:isoDaysAgo(5)});
+      }
+      if(i%4===1){
+        const checklist={}; ['theory','basic'].forEach(k=>{ const sec=CHECKLIST_SECTIONS.find(s=>s.key===k); sec.items.forEach((_,idx)=>{ checklist[k+'|'+idx]=true; }); });
+        return Object.assign({},c,{checklist, confidence:2, lastStudied:isoDaysAgo(2)});
+      }
+      return c;
+    });
+    d.tasks.push({id:uid(),subject:'Physics',chapter:'Rotational Motion',title:'Complete lecture + solve 30 questions',duration:120,priority:'High',date:todayISO(),status:'Pending'});
+    d.tasks.push({id:uid(),subject:'Chemistry',chapter:'Electrochemistry',title:'Revision + PYQs',duration:90,priority:'Medium',date:todayISO(),status:'Pending'});
+    d.tasks.push({id:uid(),subject:'Mathematics',chapter:'Integration',title:'Practice 40 questions',duration:120,priority:'High',date:todayISO(),status:'Completed'});
+    d.xp = 480;
+    this.setState({data:d});
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(d)); }catch(e){}
+    this.toast('Demo data loaded.');
+  }
+
+  renderVals(){
+    const s = this.state;
+    const d = s.data;
+    const settings = d.settings;
+    const today = todayISO();
+
+    // ---- derived aggregates ----
+    const todaySessions = d.studySessions.filter(x=>x.date===today);
+    const todayStudyMinutes = todaySessions.reduce((a,x)=>a+x.duration,0);
+    const displayTodayMinutes = todayStudyMinutes;
+    const todayQ = d.questions.filter(x=>x.date===today).reduce((a,x)=>a+x.attempted,0);
+
+    const days = new Set(d.studySessions.map(x=>x.date));
+    let streak=0; let cursor = new Date();
+    const fmtc = (dt)=>{ const c=new Date(dt); c.setMinutes(c.getMinutes()-c.getTimezoneOffset()); return c.toISOString().slice(0,10); };
+    if(!days.has(fmtc(cursor))) cursor.setDate(cursor.getDate()-1);
+    while(days.has(fmtc(cursor))){ streak++; cursor.setDate(cursor.getDate()-1); }
+
+    const chapters = d.chapters;
+    const overallProgress = chapters.length ? Math.round(chapters.reduce((a,c)=>a+chapterCompletion(c),0)/chapters.length) : 0;
+
+    function subjectStat(subject){
+      const chs = chapters.filter(c=>c.subject===subject);
+      const total = chs.length;
+      const completed = chs.filter(c=>chapterCompletion(c)===100).length;
+      const notStarted = chs.filter(c=>chapterCompletion(c)===0).length;
+      const inProgress = total-completed-notStarted;
+      const pct = total ? Math.round(chs.reduce((a,c)=>a+chapterCompletion(c),0)/total) : 0;
+      const qs = d.questions.filter(q=>q.subject===subject);
+      const attempted = qs.reduce((a,q)=>a+q.attempted,0);
+      const correct = qs.reduce((a,q)=>a+q.correct,0);
+      const accuracy = attempted ? Math.round(correct/attempted*100) : 0;
+      const hours = Math.round(d.studySessions.filter(x=>x.subject===subject).reduce((a,x)=>a+x.duration,0)/60*10)/10;
+      return { subject, total, completed, inProgress, notStarted, pct, questionsSolved: attempted, accuracy, hours };
+    }
+    const subjects = ['Physics','Chemistry','Mathematics'];
+    const subjStats = subjects.map(subjectStat);
+
+    function weakFromQuestions(){
+      const map = {};
+      d.questions.forEach(q=>{
+        const key = q.subject+'|'+q.chapter;
+        if(!map[key]) map[key]={subject:q.subject,chapter:q.chapter,correct:0,attempted:0};
+        map[key].correct+=q.correct; map[key].attempted+=q.attempted;
+      });
+      return Object.values(map).filter(m=>m.attempted>0).map(m=>({...m, acc: Math.round(m.correct/m.attempted*100)})).filter(m=>m.acc<60).sort((a,b)=>a.acc-b.acc).slice(0,5);
+    }
+
+    const reminders = [];
+    if(displayTodayMinutes < settings.dailyStudyTargetMin) reminders.push('Your daily study target is incomplete');
+    const mockToday = d.mockTests.find(m=>m.date===today);
+    if(mockToday) reminders.push('Mock test scheduled for today: '+mockToday.name);
+
+    // ---- nav ----
+    const navDefs = [
+      ['dashboard','Dashboard','DB'],['planner','Weekly Target','WT'],['subjects','Subjects','SU'],['chapters','Chapters','CH'],
+      ['daily','Daily Tracker','DT'],['questions','Question Practice','QP'],['mocks','Mock Tests','MT'],
+      ['analytics','Analytics','AN'],['settings','Settings','SE']
+    ];
+    const navItems = navDefs.map(([key,label,abbr])=>({
+      label, abbr, go: this.goPage(key), href: '#/'+key, current: s.page===key ? 'page' : undefined,
+      bg: s.page===key ? '#efe4cd' : 'transparent',
+      color: s.page===key ? '#2b2620' : '#6b6152',
+      badgeBg: s.page===key ? 'linear-gradient(135deg,#ff8a3d,#ff5e1a)' : '#efe4cd',
+      badgeColor: s.page===key ? '#100c08' : '#7d7260'
+    }));
+    const pageTitleMap = PAGE_TITLES;
+    const isNarrow = window.innerWidth < 900;
+
+    // ---- quick actions ----
+    const quickActions = [
+      {label:'Add Study Session', go: ()=>this.openSessionModal()},
+      {label:'Add Task', go: ()=>this.openTaskModal()},
+      {label:'Add Questions', go: ()=>this.openQuestionModal()},
+      {label:'Add Mock Test', go: ()=>this.openMockModal()},
+      {label:'Add Weekly Target', go: ()=>this.openTargetModal()}
+    ];
+
+    // ---- today's plan ----
+    const todayTasks = d.tasks.filter(t=>t.date===today).map(t=>({
+      id:t.id, title:t.title, subject:t.subject, chapter:t.chapter, priority:t.priority,
+      strike: t.status==='Completed'?'line-through':'none',
+      titleColor: t.status==='Completed'?'#8c8064':'#2b2620',
+      rowBg: t.status==='Completed'?'#faf6ee':'#f1e8d6',
+      checkColor: t.status==='Completed'?'#ff8a3d':'#b8ab8f',
+      checkBg: t.status==='Completed'?'#ff8a3d':'transparent',
+      checkMark: t.status==='Completed'?'✓':'',
+      prioColor: t.priority==='High'?'#c23f3f':t.priority==='Low'?'#7d7260':'#a3650a',
+      prioBg: t.priority==='High'?'#fce4e4':t.priority==='Low'?'#efe4cd':'#fdf0d9',
+      toggle: this.toggleTask(t.id), remove: this.removeTask(t.id)
+    }));
+
+    // ---- weekly bar chart (last 7 days) ----
+    const weekBars = [];
+    for(let i=6;i>=0;i--){
+      const dt = isoDaysAgo(i);
+      const mins = d.studySessions.filter(x=>x.date===dt).reduce((a,x)=>a+x.duration,0);
+      const hrs = mins/60;
+      const dayLabel = new Date(dt+'T00:00:00').toLocaleDateString('en-US',{weekday:'short'});
+      weekBars.push({ day: dayLabel, label: Math.round(hrs*10)/10+'h', height: Math.max(4, Math.min(120, hrs*22)), color: dt===today?'linear-gradient(180deg,#ff8a3d,#ff5e1a)':'#e0d3b3' });
+    }
+
+    // ---- subject cards ----
+    const subjectCards = subjStats.map(ss=>({
+      name: ss.subject, color: SUBJECT_COLOR[ss.subject], pct: ss.pct, completed: ss.completed, total: ss.total, accuracy: ss.accuracy,
+      open: this.goPage('chapters')
+    }));
+
+    // ---- weak chapters ----
+    const weakChapterList = weakFromQuestions().map(w=>({ label: w.subject+' — '+w.chapter, accuracy: w.acc }));
+
+    // ---- recent activity ----
+    const activityEvents = [
+      ...d.studySessions.map(x=>({date:x.date, text:'Studied '+x.subject+' — '+x.chapter+' ('+minsToLabel(x.duration)+')', t:x.date})),
+      ...d.mockTests.map(x=>({date:x.date, text:'Took mock test: '+x.name, t:x.date})),
+      ...d.questions.map(x=>({date:x.date, text:'Logged '+x.attempted+' questions — '+x.subject, t:x.date}))
+    ].sort((a,b)=>a.date<b.date?1:-1).slice(0,8).map(a=>({date: fmtDate(a.date), text:a.text}));
+
+    // ---- weekly targets ----
+    const weekFromNow = isoDaysAgo(-7);
+    const targetsSorted = [...d.weeklyTargets].sort((a,b)=>a.deadline<b.deadline?-1:1);
+    const mkTarget = t => ({ title:t.title, type:t.type, subject:t.subject, deadline: fmtDate(t.deadline), toggle: this.toggleTarget(t.id), remove: this.removeTarget(t.id) });
+    const overdueTargets = targetsSorted.filter(t=>!t.done && t.deadline<today).map(mkTarget);
+    const weekTargets = targetsSorted.filter(t=>!t.done && t.deadline>=today && t.deadline<=weekFromNow).map(mkTarget);
+    const laterTargets = targetsSorted.filter(t=>!t.done && t.deadline>weekFromNow).map(mkTarget);
+    const doneTargets = targetsSorted.filter(t=>t.done).map(mkTarget);
+
+    // ---- subject detail cards ----
+    const subjectDetailCards = subjStats.map(ss=>({
+      name: ss.subject, color: SUBJECT_COLOR[ss.subject], pct: ss.pct, completed: ss.completed, inProgress: ss.inProgress, notStarted: ss.notStarted,
+      questionsSolved: ss.questionsSolved, accuracy: ss.accuracy, hours: ss.hours, open: this.goPage('chapters')
+    }));
+
+    // ---- chapters page ----
+    const chapterFilters = subjects.map(sub=>({ label: sub, select: this.setChapterFilter(sub), bg: s.chapterFilter===sub?'#ff8a3d':'#efe4cd', color: s.chapterFilter===sub?'#100c08':'#6b6152' }));
+    const chapterStatusColors = {'Not Started':['#efe4cd','#7d7260'], 'In Progress':['#fdf0d9','#a3650a'], 'Completed':['#e2f5ea','#1f9d5c']};
+    const filteredChapters = chapters.filter(c=>c.subject===s.chapterFilter).map(c=>{
+      const comp = chapterCompletion(c);
+      const statusLabel = comp===0?'Not Started':comp===100?'Completed':'In Progress';
+      const sc = chapterStatusColors[statusLabel];
+      return { id:c.id, name:c.name, category: c.category ? c.category+' Chemistry' : c.subject, completion: comp, statusLabel, statusBg:sc[0], statusColor:sc[1], open: this.openChapterWorkspace(c.id) };
+    });
+    const selectedChapter = chapters.find(c=>c.id===s.selectedChapterId);
+    let chapterWorkspace = null;
+    if(selectedChapter){
+      const sections = CHECKLIST_SECTIONS.map(sec=>{
+        const scomp = sectionCompletion(selectedChapter, sec);
+        return { title: sec.title, doneCount: scomp.done, total: scomp.total,
+          items: sec.items.map((label,i)=>({ label, checked: !!(selectedChapter.checklist && selectedChapter.checklist[sec.key+'|'+i]), toggle: this.toggleChecklistItem(selectedChapter.id, sec.key, i) })) };
+      });
+      const customItems = (selectedChapter.customChecklist||[]).map(ci=>({ label:ci.label, checked:ci.checked, toggle: this.toggleCustomChecklistItem(selectedChapter.id, ci.id), remove: this.removeCustomChecklistItem(selectedChapter.id, ci.id) }));
+      const confidenceOptions = [1,2,3,4,5].map(v=>({ value:v, select: this.setChapterConfidence(selectedChapter.id, v), bg: selectedChapter.confidence===v?'#ff8a3d':'#efe4cd', color: selectedChapter.confidence===v?'#100c08':'#6b6152' }));
+      chapterWorkspace = {
+        subject: selectedChapter.subject, name: selectedChapter.name, completion: chapterCompletion(selectedChapter),
+        mainReadiness: readiness(selectedChapter, ['theory','basic','module','main']),
+        advReadiness: readiness(selectedChapter, ['theory','advanced','testing']),
+        sections, customItems, newItemText: s.newChecklistText||'', confidenceOptions, quickNotes: selectedChapter.quickNotes||''
+      };
+    }
+    function optList(list, current){ return list.map(v=> ({label:String(v), value:v, isSel: v===current})); }
+
+    // ---- daily tracker ----
+    const sessionList = [...d.studySessions].sort((a,b)=>a.date<b.date?1:-1).slice(0,30).map(x=>({date:fmtDate(x.date), subject:x.subject, chapter:x.chapter, type:x.type, duration:minsToLabel(x.duration)}));
+
+    // ---- questions page ----
+    const weekAgo = isoDaysAgo(7), monthAgo = isoDaysAgo(30);
+    const qToday = d.questions.filter(q=>q.date===today).reduce((a,q)=>a+q.attempted,0);
+    const qWeek = d.questions.filter(q=>q.date>=weekAgo).reduce((a,q)=>a+q.attempted,0);
+    const qMonth = d.questions.filter(q=>q.date>=monthAgo).reduce((a,q)=>a+q.attempted,0);
+    const qTotal = d.questions.reduce((a,q)=>a+q.attempted,0);
+    const qCorrectTotal = d.questions.reduce((a,q)=>a+q.correct,0);
+    const qAccuracy = qTotal ? Math.round(qCorrectTotal/qTotal*100) : 0;
+    const questionLogRows = [...d.questions].sort((a,b)=>a.date<b.date?1:-1).map(q=>({date:fmtDate(q.date), subject:q.subject, chapter:q.chapter, attempted:q.attempted, correct:q.correct, accuracy: q.attempted?Math.round(q.correct/q.attempted*100):0, source:q.source}));
+
+    // ---- mock tests ----
+    const mockTotal = m => m.physics+m.chemistry+m.maths;
+    const mockCorrect = m => (m.physicsCorrect||0)+(m.chemistryCorrect||0)+(m.mathsCorrect||0);
+    const mockIncorrect = m => (m.physicsIncorrect||0)+(m.chemistryIncorrect||0)+(m.mathsIncorrect||0);
+    const mockRows = [...d.mockTests].sort((a,b)=>a.date<b.date?1:-1).map(m=>{
+      const total = mockTotal(m);
+      const subjCount = (m.subjects||['Physics','Chemistry','Mathematics']).length || 1;
+      const attempted = mockCorrect(m)+mockIncorrect(m);
+      const pct = Math.round(total/(subjCount*100)*100);
+      const accuracy = attempted ? Math.round(mockCorrect(m)/attempted*100) : 0;
+      return {name:m.name, date:fmtDate(m.date), type:m.testType||'Full (P+C+M)', chapters:m.chaptersCovered||'—', total, pct, accuracy,
+        phy: m.subjects && !m.subjects.includes('Physics') ? '—' : m.physics,
+        chem: m.subjects && !m.subjects.includes('Chemistry') ? '—' : m.chemistry,
+        math: m.subjects && !m.subjects.includes('Mathematics') ? '—' : m.maths};
+    });
+    const mocksSorted = [...d.mockTests].sort((a,b)=>a.date<b.date?-1:1);
+    const maxScore = Math.max(300, ...mocksSorted.map(mockTotal));
+    const mockScoreDots = mocksSorted.map((m,i)=>{
+      const x = mocksSorted.length>1 ? (i/(mocksSorted.length-1))*580+10 : 300;
+      const y = 150 - (mockTotal(m)/maxScore)*130;
+      return {x,y};
+    });
+    const mockScorePoints = mockScoreDots.map(p=>p.x+','+p.y).join(' ');
+
+    function subjectMockStats(subject){
+      const field = SUBJECT_FIELD[subject];
+      const relevant = d.mockTests.filter(m=>(m.subjects||[]).includes(subject));
+      const count = relevant.length;
+      const avgMarks = count ? Math.round(relevant.reduce((a,m)=>a+(m[field]||0),0)/count) : 0;
+      const totalCorrect = relevant.reduce((a,m)=>a+(m[field+'Correct']||0),0);
+      const totalIncorrect = relevant.reduce((a,m)=>a+(m[field+'Incorrect']||0),0);
+      const attempted = totalCorrect+totalIncorrect;
+      const accuracy = attempted ? Math.round(totalCorrect/attempted*100) : 0;
+      return { subject, count, avgMarks, accuracy };
+    }
+    const mockSubjectCards = ['Physics','Chemistry','Mathematics'].map(sub=>{
+      const st = subjectMockStats(sub);
+      return { name: sub, color: SUBJECT_COLOR[sub], count: st.count, avgMarks: st.avgMarks, accuracy: st.accuracy };
+    });
+
+    // ---- analytics ----
+    const rangeDays = s.analyticsRange==='all' ? 3650 : Number(s.analyticsRange);
+    const rangeStart = isoDaysAgo(rangeDays-1);
+    const rangeSessions = d.studySessions.filter(x=>x.date>=rangeStart);
+    const rangeQuestionsArr = d.questions.filter(x=>x.date>=rangeStart);
+    const rangeMocksArr = d.mockTests.filter(x=>x.date>=rangeStart);
+    const rangeHours = Math.round(rangeSessions.reduce((a,x)=>a+x.duration,0)/60*10)/10;
+    const rangeQuestions = rangeQuestionsArr.reduce((a,x)=>a+x.attempted,0);
+    const rangeChapters = chapters.filter(c=>chapterCompletion(c)===100 && c.lastStudied && c.lastStudied>=rangeStart).length;
+    const rangeMocks = rangeMocksArr.length;
+    const rangeCorrect = rangeQuestionsArr.reduce((a,x)=>a+x.correct,0);
+    const rangeAccuracy = rangeQuestions ? Math.round(rangeCorrect/rangeQuestions*100) : 0;
+    const activeDays = new Set(rangeSessions.map(x=>x.date)).size || 1;
+    const rangeAvgDaily = minsToLabel(rangeSessions.reduce((a,x)=>a+x.duration,0)/activeDays);
+    const rangeOptions = [['7','7D'],['30','30D'],['90','90D'],['all','All']].map(([v,l])=>({label:l, select:this.setAnalyticsRange(v), bg: s.analyticsRange===v?'#ff8a3d':'#efe4cd', color: s.analyticsRange===v?'#100c08':'#6b6152'}));
+
+    const totalMins = subjects.reduce((a,sub)=>a+d.studySessions.filter(x=>x.subject===sub).reduce((b,x)=>b+x.duration,0),0) || 1;
+    let offsetAcc = 0;
+    const donutSegments = subjects.map(sub=>{
+      const mins = d.studySessions.filter(x=>x.subject===sub).reduce((a,x)=>a+x.duration,0);
+      const frac = mins/totalMins;
+      const circumference = 2*Math.PI*15.9;
+      const dash = (frac*circumference)+' '+circumference;
+      const seg = {color: SUBJECT_COLOR[sub], dash, offset: -offsetAcc*circumference};
+      offsetAcc += frac;
+      return seg;
+    });
+    const donutLegend = subjects.map(sub=>({color:SUBJECT_COLOR[sub], label: sub}));
+
+    const qByDay = [];
+    for(let i=6;i>=0;i--){ const dt=isoDaysAgo(i); qByDay.push(d.questions.filter(q=>q.date===dt).reduce((a,q)=>a+q.attempted,0)); }
+    const maxQ = Math.max(1,...qByDay);
+    const questionsPerDayPoints = qByDay.map((v,i)=> (i*(280/6)+10)+','+(115-(v/maxQ)*100) ).join(' ');
+
+    // ---- search ----
+    const sq = (s.searchQuery||'').toLowerCase();
+    let searchResults = [];
+    if(sq){
+      chapters.filter(c=>c.name.toLowerCase().includes(sq)).slice(0,5).forEach(c=>searchResults.push({label:c.subject+' — '+c.name, kind:'Chapter', go:()=>{this.setState({page:'chapters', chapterFilter:c.subject, selectedChapterId:null, searchOpen:false, searchQuery:''});}}));
+      d.tasks.filter(t=>t.title.toLowerCase().includes(sq)).slice(0,5).forEach(t=>searchResults.push({label:t.title, kind:'Task', go:()=>{this.setState({page:'planner', searchOpen:false, searchQuery:''});}}));
+      d.mockTests.filter(m=>m.name.toLowerCase().includes(sq)).slice(0,5).forEach(m=>searchResults.push({label:m.name, kind:'Mock Test', go:()=>{this.setState({page:'mocks', searchOpen:false, searchQuery:''});}}));
+    }
+
+    // ---- modal field definitions ----
+    let modalTitle = '', modalFields = [];
+    const fd = s.formDraft;
+    if(s.modal==='task'){
+      modalTitle = 'Add Task';
+      modalFields = [
+        {label:'Subject', isSelect:true, options: optList(subjects, fd.subject), onChange:this.setDraft('subject')},
+        {label:'Chapter', isInput:true, inputType:'text', value:fd.chapter, onChange:this.setDraft('chapter')},
+        {label:'Task title', isInput:true, inputType:'text', value:fd.title, onChange:this.setDraft('title')},
+        {label:'Priority', isSelect:true, options: optList(['High','Medium','Low'], fd.priority), onChange:this.setDraft('priority')},
+        {label:'Date', isInput:true, inputType:'date', value:fd.date, onChange:this.setDraft('date')}
+      ];
+    } else if(s.modal==='session'){
+      modalTitle = 'Log Study Session';
+      modalFields = [
+        {label:'Subject', isSelect:true, options: optList(subjects, fd.subject), onChange:this.setDraft('subject')},
+        {label:'Chapter', isInput:true, inputType:'text', value:fd.chapter, onChange:this.setDraft('chapter')},
+        {label:'Type', isSelect:true, options: optList(ACTIVITY_TYPES, fd.type), onChange:this.setDraft('type')},
+        {label:'Duration (minutes)', isInput:true, inputType:'number', value:fd.duration, onChange:this.setDraft('duration')},
+        {label:'Date', isInput:true, inputType:'date', value:fd.date, onChange:this.setDraft('date')}
+      ];
+    } else if(s.modal==='question'){
+      modalTitle = 'Log Questions';
+      modalFields = [
+        {label:'Subject', isSelect:true, options: optList(subjects, fd.subject), onChange:this.setDraft('subject')},
+        {label:'Chapter', isInput:true, inputType:'text', value:fd.chapter, onChange:this.setDraft('chapter')},
+        {label:'Attempted', isInput:true, inputType:'number', value:fd.attempted, onChange:this.setDraft('attempted')},
+        {label:'Correct', isInput:true, inputType:'number', value:fd.correct, onChange:this.setDraft('correct')},
+        {label:'Incorrect', isInput:true, inputType:'number', value:fd.incorrect, onChange:this.setDraft('incorrect')},
+        {label:'Source', isSelect:true, options: optList(SOURCE_OPTIONS, fd.source), onChange:this.setDraft('source')},
+        {label:'Date', isInput:true, inputType:'date', value:fd.date, onChange:this.setDraft('date')}
+      ];
+    } else if(s.modal==='mock'){
+      modalTitle = 'Add Mock Test';
+      modalFields = [
+        {label:'Test name', isInput:true, inputType:'text', value:fd.name, onChange:this.setDraft('name')},
+        {label:'Date', isInput:true, inputType:'date', value:fd.date, onChange:this.setDraft('date')},
+        {label:'Exam type', isSelect:true, options: optList(['JEE Main','JEE Advanced'], fd.examType), onChange:this.setDraft('examType')},
+        {label:'Test type', isSelect:true, options: optList(Object.keys(TEST_TYPE_SUBJECTS), fd.testType), onChange:this.setDraft('testType')},
+      ];
+      (TEST_TYPE_SUBJECTS[fd.testType] || TEST_TYPE_SUBJECTS['Full (P+C+M)']).forEach(subj=>{
+        const f = SUBJECT_FIELD[subj];
+        const draftKey = 'chapters_'+f;
+        const selected = fd[draftKey] || [];
+        const pickerOpen = !!s.chapterPickerOpen[draftKey];
+        modalFields.push({label:subj+' Chapters', isChapterPicker:true, open: pickerOpen, toggleOpen: this.toggleChapterPicker(draftKey), caret: pickerOpen?'▴':'▾',
+          summary: selected.length ? selected.length+' chapter'+(selected.length>1?'s':'')+' selected' : 'Select chapters...',
+          items: chapters.filter(c=>c.subject===subj).map(c=>({label:c.name, checked: selected.includes(c.name), toggle: this.toggleDraftChapter(draftKey, c.name)}))
+        });
+        modalFields.push({label:subj+' Marks', isInput:true, inputType:'number', value:fd[f], onChange:this.setDraft(f)});
+        modalFields.push({label:subj+' Correct', isInput:true, inputType:'number', value:fd[f+'Correct'], onChange:this.setDraft(f+'Correct')});
+        modalFields.push({label:subj+' Incorrect', isInput:true, inputType:'number', value:fd[f+'Incorrect'], onChange:this.setDraft(f+'Incorrect')});
+      });
+      modalFields.push({label:'Unattempted', isInput:true, inputType:'number', value:fd.unattempted, onChange:this.setDraft('unattempted')});
+      modalFields.push({label:'Time taken (min)', isInput:true, inputType:'number', value:fd.timeTaken, onChange:this.setDraft('timeTaken')});
+    } else if(s.modal==='target'){
+      modalTitle = 'Add Weekly Target';
+      modalFields = [
+        {label:'Type', isSelect:true, options: optList(['Chapter Completion','PYQ Session','Revision Session','Custom'], fd.type), onChange:this.setDraft('type')},
+        {label:'Subject', isSelect:true, options: optList(subjects, fd.subject), onChange:this.setDraft('subject')},
+        {label:'Title (e.g. chapter or task name)', isInput:true, inputType:'text', value:fd.title, onChange:this.setDraft('title')},
+        {label:'Deadline', isInput:true, inputType:'date', value:fd.deadline, onChange:this.setDraft('deadline')}
+      ];
+    }
+    // fix boolean fields (isInput default true unless select/textarea)
+    modalFields = modalFields.map(f=>({...f, isInput: !f.isSelect && !f.isTextarea && !f.isMultiSelect && !f.isChapterPicker}));
+
+    const hour = new Date().getHours();
+    const timeOfDay = hour<12?'Morning':hour<17?'Afternoon':'Evening';
+
+    return {
+      sidebarDisplay: (s.sidebarOpen || !isNarrow) ? 'flex' : 'none',
+      closeBtnDisplay: isNarrow ? 'block' : 'none',
+      hamburgerDisplay: isNarrow ? 'block' : 'none',
+      overlayDisplay: isNarrow ? 'block' : 'none',
+      mainMargin: isNarrow ? '0' : '240px',
+      splitCols: isNarrow ? '1fr' : '1.4fr 1fr',
+      mainPadding: isNarrow ? '18px 16px 60px 16px' : '22px 24px 60px 24px',
+      navItems, pageTitle: pageTitleMap[s.page], quickActions,
+      streakDays: streak, todayTimeLabel: minsToLabel(displayTodayMinutes),
+      openSidebar: ()=>this.openSidebar(), closeSidebar: ()=>this.closeSidebar(), sidebarOpen: s.sidebarOpen,
+      goSettings: this.goPage('settings'),
+      openSearch: ()=>this.openSearch(), closeSearch: ()=>this.closeSearch(), searchOpen: s.searchOpen, searchQuery: s.searchQuery, setSearchQuery: this.setSearchQuery.bind(this), searchResults,
+      quickOpen: s.quickOpen, toggleQuick: ()=>this.toggleQuick(),
+      hasReminders: reminders.length>0, reminders,
+
+      isDashboard: s.page==='dashboard', isPlanner: s.page==='planner', isSubjects: s.page==='subjects', isChapters: s.page==='chapters',
+      isDaily: s.page==='daily', isQuestions: s.page==='questions', isMocks: s.page==='mocks',
+      isAnalytics: s.page==='analytics', isSettings: s.page==='settings',
+
+      userName: settings.name, timeOfDay, todayDateLabel: fmtDate(today),
+      targetTimeLabel: minsToLabel(settings.dailyStudyTargetMin),
+      studyPct: Math.round(displayTodayMinutes/settings.dailyStudyTargetMin*100)||0,
+      studyPctClamped: clamp(Math.round(displayTodayMinutes/settings.dailyStudyTargetMin*100)||0,0,100),
+      todayQuestions: todayQ, questionTarget: settings.dailyQuestionTarget,
+      questionPct: Math.round(todayQ/settings.dailyQuestionTarget*100)||0,
+      questionPctClamped: clamp(Math.round(todayQ/settings.dailyQuestionTarget*100)||0,0,100),
+      xp: d.xp||0, milestoneCount: Math.floor((d.xp||0)/100), overallProgress,
+
+      hasTasksToday: todayTasks.length>0, noTasksToday: todayTasks.length===0, todayTasks, openTaskModal: ()=>this.openTaskModal(),
+
+      weekBars,
+      subjectCards,
+      hasWeakChapters: weakChapterList.length>0, noWeakChapters: weakChapterList.length===0, weakChapterList,
+      hasActivity: activityEvents.length>0, noActivity: activityEvents.length===0, recentActivity: activityEvents,
+
+      openTargetModal: ()=>this.openTargetModal(),
+      hasOverdueTargets: overdueTargets.length>0, noOverdueTargets: overdueTargets.length===0, overdueTargets,
+      hasWeekTargets: weekTargets.length>0, noWeekTargets: weekTargets.length===0, weekTargets,
+      hasLaterTargets: laterTargets.length>0, noLaterTargets: laterTargets.length===0, laterTargets,
+      hasDoneTargets: doneTargets.length>0, noDoneTargets: doneTargets.length===0, doneTargets,
+
+      subjectDetailCards,
+
+      chapterFilters, filteredChapters,
+      chapterListMode: !chapterWorkspace, chapterWorkspaceOpen: !!chapterWorkspace, workspace: chapterWorkspace || {},
+      closeChapterWorkspace: ()=>this.closeChapterWorkspace(), addCustomChecklistItem: ()=>this.addCustomChecklistItem(),
+      setNewChecklistText: this.setNewChecklistText.bind(this), setChapterQuickNotes: this.setChapterQuickNotes.bind(this),
+
+      hasSessions: sessionList.length>0, noSessions: sessionList.length===0, sessionList, openSessionModal: ()=>this.openSessionModal(),
+
+      qToday, qWeek, qMonth, qTotal, qAccuracy, hasQuestionLog: questionLogRows.length>0, noQuestionLog: questionLogRows.length===0, questionLogRows, openQuestionModal: ()=>this.openQuestionModal(),
+
+      hasMocks: mockRows.length>0, noMocks: mockRows.length===0, mockRows, mockScorePoints, mockScoreDots, openMockModal: ()=>this.openMockModal(), mockSubjectCards,
+
+      rangeOptions, rangeHours, rangeQuestions, rangeChapters, rangeMocks, rangeAccuracy, rangeAvgDaily,
+      donutSegments, donutLegend, questionsPerDayPoints,
+
+      settings, setName: this.setName.bind(this), setTargetExam: this.setTargetExam.bind(this), setTargetYear: this.setTargetYear.bind(this),
+      setDailyStudyTarget: this.setDailyStudyTarget.bind(this), setDailyQuestionTarget: this.setDailyQuestionTarget.bind(this),
+      exportData: ()=>this.exportData(), importData: this.importData.bind(this), loadDemoData: ()=>this.loadDemoData(),
+      confirmReset: ()=>this.confirmReset(), resetConfirmOpen: s.resetConfirmOpen, cancelReset: ()=>this.cancelReset(), doReset: ()=>this.doReset(),
+
+      modalOpen: !!s.modal, modalTitle, modalFields, closeModal: ()=>this.closeModal(), submitModal: ()=>this.submitModal(), stopProp: this.stopProp,
+
+      toastVisible: !!s.toast, toastMessage: s.toast
+    };
+  }
+}
+
+</script>
+</body>
+</html>
