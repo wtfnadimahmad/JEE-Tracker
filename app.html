@@ -423,21 +423,19 @@
               <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:14px;"><div style="font-size:11px;color:#7d7260;">JEE Main Readiness</div><div style="font-size:20px;font-weight:800;">{{ workspace.mainReadiness }}%</div></div>
               <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:14px;"><div style="font-size:11px;color:#7d7260;">JEE Advanced Readiness</div><div style="font-size:20px;font-weight:800;">{{ workspace.advReadiness }}%</div></div>
             </div>
-            <sc-for list="{{ workspace.sections }}" as="sec" hint-placeholder-count="7">
-              <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:16px;margin-bottom:12px;">
-                <div style="display:flex;align-items:center;margin-bottom:10px;">
-                  <div style="font-size:13px;font-weight:700;">{{ sec.title }}</div>
-                  <div style="margin-left:auto;font-size:11.5px;color:#7d7260;">{{ sec.doneCount }}/{{ sec.total }}</div>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:7px;">
-                  <sc-for list="{{ sec.items }}" as="it" hint-placeholder-count="5">
-                    <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#3a332a;cursor:pointer;">
-                      <input type="checkbox" checked="{{ it.checked }}" onchange="{{ it.toggle }}" style="width:15px;height:15px;accent-color:#ff8a3d;cursor:pointer;"/>{{ it.label }}
-                    </label>
-                  </sc-for>
-                </div>
+            <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:16px;margin-bottom:12px;">
+              <div style="display:flex;align-items:center;margin-bottom:10px;">
+                <div style="font-size:13px;font-weight:700;">Chapter Progress</div>
+                <div style="margin-left:auto;font-size:11.5px;color:#7d7260;">{{ workspace.progressDone }}/{{ workspace.progressTotal }}</div>
               </div>
-            </sc-for>
+              <div style="display:flex;flex-direction:column;gap:9px;">
+                <sc-for list="{{ workspace.progressItems }}" as="it" hint-placeholder-count="5">
+                  <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3a332a;cursor:pointer;">
+                    <input type="checkbox" checked="{{ it.checked }}" onchange="{{ it.toggle }}" style="width:15px;height:15px;accent-color:#ff8a3d;cursor:pointer;"/>{{ it.label }}
+                  </label>
+                </sc-for>
+              </div>
+            </div>
             <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:16px;margin-bottom:12px;">
               <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Custom Checklist</div>
               <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:10px;">
@@ -465,7 +463,7 @@
             </div>
             <div style="background:#fffdf8;border:1px solid #e6dcc4;border-radius:12px;padding:16px;">
               <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Quick Revision Notes</div>
-              <textarea oninput="{{ setChapterQuickNotes }}" rows="5" placeholder="Formulas, tricks, exceptions, common mistakes..." style="width:100%;background:#ffffff;border:1px solid #ddd0b3;color:#2b2620;padding:10px;border-radius:8px;font-size:12.5px;box-sizing:border-box;resize:vertical;">{{ workspace.quickNotes }}</textarea>
+              <textarea value="{{ workspace.quickNotes }}" oninput="{{ setChapterQuickNotes }}" rows="5" placeholder="Formulas, tricks, exceptions, common mistakes..." style="width:100%;background:#ffffff;border:1px solid #ddd0b3;color:#2b2620;padding:10px;border-radius:8px;font-size:12.5px;box-sizing:border-box;resize:vertical;"></textarea>
             </div>
           </sc-if>
         </div>
@@ -781,13 +779,11 @@ const TEST_TYPE_SUBJECTS = {
 };
 const SUBJECT_FIELD = { Physics:'physics', Chemistry:'chemistry', Mathematics:'maths' };
 const CHECKLIST_SECTIONS = [
-  {key:'theory', title:'Theory & Concepts', items:['Theory completed','All lectures completed','Class notes completed','NCERT read','Important concepts marked','Important formulas learned','Formula sheet created','Short notes created']},
-  {key:'basic', title:'Basic Practice', items:['Solved examples','Basic questions completed','Coaching homework completed','DPP completed','DPP mistakes reviewed']},
-  {key:'module', title:'Module Practice', items:['Module Level 1 completed','Module Level 2 completed','Advanced-level module questions completed','Marked difficult questions']},
-  {key:'main', title:'JEE Main', items:['JEE Main PYQs completed','JEE Main PYQs analyzed','JEE Main timed practice completed','JEE Main chapter test completed']},
-  {key:'advanced', title:'JEE Advanced', items:['JEE Advanced PYQs completed','Advanced-level practice completed','Advanced questions analyzed','Advanced chapter test completed']},
-  {key:'revision', title:'Revision', items:['Revision 1','Revision 2','Revision 3','Revision 4','Revision 5','Formula revision','Short notes revision']},
-  {key:'testing', title:'Testing', items:['Chapter test','Timed test','Mixed-topic test','Accuracy analyzed','Mistakes analyzed','Weak concepts identified']}
+  {key:'theory', title:'Theory', items:['Theory']},
+  {key:'basic', title:'Basic Practice', items:['Basic Practice']},
+  {key:'main', title:'JEE Main', items:['JEE Main']},
+  {key:'advanced', title:'JEE Advanced', items:['JEE Advanced']},
+  {key:'revision', title:'Revision', items:['Revision']}
 ];
 
 function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
@@ -1217,18 +1213,15 @@ class Component extends DCLogic {
     const selectedChapter = chapters.find(c=>c.id===s.selectedChapterId);
     let chapterWorkspace = null;
     if(selectedChapter){
-      const sections = CHECKLIST_SECTIONS.map(sec=>{
-        const scomp = sectionCompletion(selectedChapter, sec);
-        return { title: sec.title, doneCount: scomp.done, total: scomp.total,
-          items: sec.items.map((label,i)=>({ label, checked: !!(selectedChapter.checklist && selectedChapter.checklist[sec.key+'|'+i]), toggle: this.toggleChecklistItem(selectedChapter.id, sec.key, i) })) };
-      });
+      const progressItems = CHECKLIST_SECTIONS.map(sec=>({ label: sec.title, checked: !!(selectedChapter.checklist && selectedChapter.checklist[sec.key+'|0']), toggle: this.toggleChecklistItem(selectedChapter.id, sec.key, 0) }));
+      const progressDone = progressItems.filter(it=>it.checked).length;
       const customItems = (selectedChapter.customChecklist||[]).map(ci=>({ label:ci.label, checked:ci.checked, toggle: this.toggleCustomChecklistItem(selectedChapter.id, ci.id), remove: this.removeCustomChecklistItem(selectedChapter.id, ci.id) }));
       const confidenceOptions = [1,2,3,4,5].map(v=>({ value:v, select: this.setChapterConfidence(selectedChapter.id, v), bg: selectedChapter.confidence===v?'#ff8a3d':'#efe4cd', color: selectedChapter.confidence===v?'#100c08':'#6b6152' }));
       chapterWorkspace = {
         subject: selectedChapter.subject, name: selectedChapter.name, completion: chapterCompletion(selectedChapter),
-        mainReadiness: readiness(selectedChapter, ['theory','basic','module','main']),
-        advReadiness: readiness(selectedChapter, ['theory','advanced','testing']),
-        sections, customItems, newItemText: s.newChecklistText||'', confidenceOptions, quickNotes: selectedChapter.quickNotes||''
+        mainReadiness: readiness(selectedChapter, ['theory','basic','main']),
+        advReadiness: readiness(selectedChapter, ['theory','basic','advanced']),
+        progressItems, progressDone, progressTotal: progressItems.length, customItems, newItemText: s.newChecklistText||'', confidenceOptions, quickNotes: selectedChapter.quickNotes||''
       };
     }
     function optList(list, current){ return list.map(v=> ({label:String(v), value:v, isSel: v===current})); }
